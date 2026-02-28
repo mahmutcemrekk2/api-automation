@@ -1,0 +1,12 @@
+{
+  "dev": {
+    "baseUrl": "https://dummyjson.com",
+    "defaultUsername": "emilys",
+    "defaultPassword": "emilyspass"
+  },
+  "qa": {
+    "baseUrl": "https://dummyjson.com",
+    "defaultUsername": "emilys",
+    "defaultPassword": "emilyspass"
+  }
+}

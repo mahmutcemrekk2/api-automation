@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test Automation Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <h2>⚡ API Automation</h2>
+            <span>Test Dashboard v1.0</span>
+        </div>
+
+        <div class="nav-item active" data-page="dashboard">
+            <span class="icon">📊</span> Dashboard
+        </div>
+        <div class="nav-item" data-page="new-scenario">
+            <span class="icon">➕</span> New Scenario
+        </div>
+        <div class="nav-item" data-page="existing">
+            <span class="icon">📋</span> Existing Scenarios
+        </div>
+
+        <!-- Git Panel -->
+        <div class="git-panel">
+            <div class="git-branch">
+                🌿 <span class="branch-name" id="gitBranch">loading...</span>
+            </div>
+            <button class="git-btn" onclick="showModal('branch-modal')">🌿 New Branch</button>
+            <button class="git-btn run-tests" id="runTestsBtn" onclick="runTests()">▶ Run Tests</button>
+            <button class="git-btn primary" id="commitPushBtn" onclick="showModal('commit-modal')" disabled>
+                🚀 Commit & Push
+            </button>
+            <div id="testStatus" style="font-size:11px; margin-top:8px; color:var(--text-muted)"></div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+        <!-- ==================== DASHBOARD ==================== -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <p>API test coverage overview</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">Total Endpoints</div>
+                    <div class="value accent" id="statTotal">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Covered</div>
+                    <div class="value success" id="statCovered">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Missing</div>
+                    <div class="value warning" id="statMissing">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Coverage</div>
+                    <div class="value accent" id="statPercent">-</div>
+                    <div class="coverage-bar">
+                        <div class="fill" id="coverageFill" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom:14px; font-size:16px;">Resource Coverage</h3>
+            <table class="resource-table">
+                <thead>
+                    <tr>
+                        <th>Resource</th>
+                        <th>Total</th>
+                        <th>Covered</th>
+                        <th>Missing</th>
+                        <th>Coverage</th>
+                    </tr>
+                </thead>
+                <tbody id="resourceTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- ==================== NEW SCENARIO ==================== -->
+        <div class="page" id="page-new-scenario">
+            <div class="page-header">
+                <h1>New Scenario Builder</h1>
+                <p>Select an endpoint and build your test scenario</p>
+            </div>
+
+            <div class="filename-input" style="gap:10px;">
+                <label style="font-size:12px;color:var(--text-muted);white-space:nowrap">Feature & Scenario:</label>
+                <select id="featureSelect" onchange="toggleFeatureInput(this.value)"
+                    style="width:200px; font-family:'JetBrains Mono',monospace; padding:8px">
+                    <option value="NEW">-- 📄 Create New Feature --</option>
+                </select>
+                <input type="text" id="featureFilename" placeholder="Feature file (e.g. auth)" oninput="updatePreview()"
+                    style="font-family:'JetBrains Mono',monospace; width:180px;">
+                <span class="suffix" id="featureSuffix">.feature</span>
+                <input type="text" id="scenarioNameInput" placeholder="Scenario name (e.g. Valid Login)"
+                    oninput="updatePreview()"
+                    style="font-family:'JetBrains Mono',monospace; width: 220px; margin-left:12px;">
+            </div>
+
+            <div class="filename-input" style="gap:10px; margin-top:10px;">
+                <label style="font-size:12px;color:var(--text-muted);white-space:nowrap">Tags:</label>
+                <input type="text" id="scenarioTags" placeholder="@smoke @regression" value="@smoke"
+                    oninput="updatePreview()" style="font-family:'JetBrains Mono',monospace; width: 300px;">
+            </div>
+
+            <div class="builder-layout">
+                <div style="flex: 2; display: flex; flex-direction: column; gap: 15px;">
+                    <div class="builder-steps" id="setupSteps"></div>
+
+                    <button class="btn btn-secondary" onclick="addSetupStep()"
+                        style="width: 100%; border: 1px dashed var(--accent); color:var(--accent); background: rgba(59, 130, 246, 0.05); padding: 12px; font-size: 13px; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                        🔌 + Add Pre-requisite Request
+                    </button>
+
+                    <div class="builder-steps" id="builderSteps">
+                        <!-- Flow steps will be rendered here -->
+                    </div>
+                </div>
+
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 20px;">
+                    <div class="preview-panel" style="flex: unset; min-height: 250px;">
+                        <div class="preview-header">
+                            <h3>📄 Gherkin Preview</h3>
+                            <button class="btn btn-secondary" style="padding:6px 12px; font-size:11px"
+                                onclick="copyPreview()">📋 Copy</button>
+                        </div>
+                        <div class="preview-body" id="previewBody">
+                            <span class="comment"># Select an endpoint to start building...</span>
+                        </div>
+                    </div>
+
+                    <div class="preview-panel"
+                        style="flex: 1; display: flex; flex-direction: column; min-height: 300px;">
+                        <div class="preview-header">
+                            <h3>🔍 Test Logs & Response</h3>
+                        </div>
+                        <div class="preview-body" id="testResponseBox" style="flex: 1; overflow-y: auto;">
+                            <span class="comment"># Run "Test Scenario" to see API response here...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-secondary" onclick="addFlowStep()">➕ Add Step</button>
+                <button class="btn btn-secondary" onclick="resetBuilder()">🔄 Reset</button>
+                <button class="btn btn-secondary" id="testScenarioBtn" onclick="testUnsavedScenario()">🧪 Test
+                    Scenario</button>
+                <button class="btn btn-primary" id="generateFeatureBtn" onclick="generateFeature()" disabled
+                    title="You must test the scenario successfully before generating">⚡ Generate Feature File</button>
+            </div>
+        </div>
+
+        <!-- ==================== EXISTING SCENARIOS ==================== -->
+        <div class="page" id="page-existing">
+            <div class="page-header">
+                <h1>Existing Scenarios</h1>
+                <p>Manage your current test scenarios</p>
+            </div>
+
+            <div id="existingList">
+                <div style="color:var(--text-muted); padding:40px; text-align:center">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Branch Modal -->
+    <div class="modal-overlay" id="branch-modal">
+        <div class="modal">
+            <h3>🌿 Create New Branch</h3>
+            <div class="form-group">
+                <label>Branch Name</label>
+                <input type="text" id="branchNameInput" placeholder="feature/add-user-tests">
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="closeModals()">Cancel</button>
+                <button class="btn btn-primary" onclick="createBranch()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commit Modal -->
+    <div class="modal-overlay" id="commit-modal">
+        <div class="modal">
+            <h3>🚀 Commit & Push</h3>
+            <div class="form-group">
+                <label>Commit Message</label>
+                <input type="text" id="commitMessageInput" placeholder="feat: add new API test scenarios">
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="closeModals()">Cancel</button>
+                <button class="btn btn-primary" onclick="commitAndPush()">Commit & Push</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal" style="width:600px; max-width:90vw;">
+            <h3>✏️ Edit Feature File</h3>
+            <p style="color:var(--warning);margin-bottom:15px;font-size:13px" id="editModalSubtitle"></p>
+            <input type="hidden" id="editFilename">
+            <textarea id="editContent"
+                style="width:100%; height:300px; font-family:'JetBrains Mono',monospace; font-size:12px; background:#1A1D24; color:#ccc; border:1px solid #333; padding:10px;"></textarea>
+            <div class="btn-row" style="margin-top:20px;">
+                <button class="btn btn-secondary" onclick="closeModals()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEditedFeature()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Scenario Modal -->
+    <div class="modal-overlay" id="edit-scenario-modal">
+        <div class="modal" style="width:700px; max-width:90vw;">
+            <h3>✏️ Edit Scenario</h3>
+            <p style="color:var(--warning);margin-bottom:15px;font-size:13px">Warning: Invalid Gherkin syntax may break
+                the tests.</p>
+            <input type="hidden" id="editScenarioFilename">
+            <input type="hidden" id="editScenarioOriginalName">
+            <textarea id="editScenarioContent"
+                style="width:100%; height:250px; font-family:'JetBrains Mono',monospace; font-size:12px; background:#1A1D24; color:#ccc; border:1px solid #333; padding:10px;"></textarea>
+
+            <div id="editScenarioTestResult"
+                style="margin-top:15px; display:none; padding:10px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:11px; max-height:150px; overflow-y:auto;">
+            </div>
+
+            <div class="btn-row" style="margin-top:20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-secondary" onclick="closeModals()">Cancel</button>
+                <button class="btn btn-secondary" id="testEditScenarioBtn" onclick="testEditedScenario()">🧪 Test
+                    Scenario</button>
+                <button class="btn btn-primary" id="saveEditScenarioBtn" onclick="saveEditedScenario()" disabled
+                    title="You must test the scenario successfully before saving">Save Scenario</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/app.js"></script>
+</body>
+
+</html>

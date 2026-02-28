@@ -1,0 +1,1027 @@
+{
+    "version": "1.0.0",
+    "apiName": "DummyJSON",
+    "baseUrl": "https://dummyjson.com",
+    "lastUpdated": "2026-02-27",
+    "endpoints": [
+        {
+            "resource": "auth",
+            "name": "Login and get tokens",
+            "method": "POST",
+            "path": "/auth/login",
+            "requiresAuth": false,
+            "requestBody": {
+                "username": "emilys",
+                "password": "emilyspass",
+                "expiresInMins": 30
+            },
+            "responseFields": [
+                "id",
+                "username",
+                "email",
+                "firstName",
+                "lastName",
+                "accessToken",
+                "refreshToken"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "auth",
+            "name": "Get current auth user",
+            "method": "GET",
+            "path": "/auth/me",
+            "requiresAuth": true,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "username",
+                "email",
+                "firstName",
+                "lastName"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "auth",
+            "name": "Refresh auth session",
+            "method": "POST",
+            "path": "/auth/refresh",
+            "requiresAuth": false,
+            "requestBody": {
+                "refreshToken": "YOUR_REFRESH_TOKEN",
+                "expiresInMins": 30
+            },
+            "responseFields": [
+                "accessToken",
+                "refreshToken"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "products",
+            "name": "Get all products",
+            "method": "GET",
+            "path": "/products",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "products",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "limit",
+                "skip",
+                "select",
+                "sortBy",
+                "order"
+            ]
+        },
+        {
+            "resource": "products",
+            "name": "Get a single product",
+            "method": "GET",
+            "path": "/products/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "title",
+                "description",
+                "category",
+                "price",
+                "rating",
+                "stock",
+                "brand"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "products",
+            "name": "Search products",
+            "method": "GET",
+            "path": "/products/search",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "products",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "q",
+                "limit",
+                "skip",
+                "select"
+            ]
+        },
+        {
+            "resource": "products",
+            "name": "Get all products categories",
+            "method": "GET",
+            "path": "/products/categories",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [],
+            "queryParams": []
+        },
+        {
+            "resource": "products",
+            "name": "Get products category list",
+            "method": "GET",
+            "path": "/products/category-list",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [],
+            "queryParams": []
+        },
+        {
+            "resource": "products",
+            "name": "Get products by category",
+            "method": "GET",
+            "path": "/products/category/{categoryName}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "products",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "limit",
+                "skip",
+                "select"
+            ]
+        },
+        {
+            "resource": "products",
+            "name": "Add a product",
+            "method": "POST",
+            "path": "/products/add",
+            "requiresAuth": false,
+            "requestBody": {
+                "title": "Product Name",
+                "description": "Product description",
+                "price": 99.99,
+                "category": "category-name"
+            },
+            "responseFields": [
+                "id",
+                "title",
+                "description",
+                "price",
+                "category"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "products",
+            "name": "Update a product",
+            "method": "PUT",
+            "path": "/products/{id}",
+            "requiresAuth": false,
+            "requestBody": {
+                "title": "Updated Title"
+            },
+            "responseFields": [
+                "id",
+                "title",
+                "price",
+                "category"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "products",
+            "name": "Delete a product",
+            "method": "DELETE",
+            "path": "/products/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "title",
+                "isDeleted",
+                "deletedOn"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "carts",
+            "name": "Get all carts",
+            "method": "GET",
+            "path": "/carts",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "carts",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "limit",
+                "skip"
+            ]
+        },
+        {
+            "resource": "carts",
+            "name": "Get a single cart",
+            "method": "GET",
+            "path": "/carts/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "products",
+                "total",
+                "discountedTotal",
+                "userId",
+                "totalProducts",
+                "totalQuantity"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "carts",
+            "name": "Get carts by user",
+            "method": "GET",
+            "path": "/carts/user/{userId}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "carts",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "carts",
+            "name": "Add a cart",
+            "method": "POST",
+            "path": "/carts/add",
+            "requiresAuth": false,
+            "requestBody": {
+                "userId": 1,
+                "products": [
+                    {
+                        "id": 1,
+                        "quantity": 1
+                    }
+                ]
+            },
+            "responseFields": [
+                "id",
+                "products",
+                "total",
+                "totalProducts",
+                "totalQuantity",
+                "userId"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "carts",
+            "name": "Update a cart",
+            "method": "PUT",
+            "path": "/carts/{id}",
+            "requiresAuth": false,
+            "requestBody": {
+                "merge": true,
+                "products": [
+                    {
+                        "id": 1,
+                        "quantity": 1
+                    }
+                ]
+            },
+            "responseFields": [
+                "id",
+                "products",
+                "total",
+                "totalProducts"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "carts",
+            "name": "Delete a cart",
+            "method": "DELETE",
+            "path": "/carts/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "isDeleted",
+                "deletedOn"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "recipes",
+            "name": "Get all recipes",
+            "method": "GET",
+            "path": "/recipes",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "recipes",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "limit",
+                "skip",
+                "select",
+                "sortBy",
+                "order"
+            ]
+        },
+        {
+            "resource": "recipes",
+            "name": "Get a single recipe",
+            "method": "GET",
+            "path": "/recipes/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "name",
+                "ingredients",
+                "instructions",
+                "prepTimeMinutes",
+                "cookTimeMinutes",
+                "servings",
+                "cuisine",
+                "tags",
+                "mealType"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "recipes",
+            "name": "Search recipes",
+            "method": "GET",
+            "path": "/recipes/search",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "recipes",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "q"
+            ]
+        },
+        {
+            "resource": "recipes",
+            "name": "Get all recipes tags",
+            "method": "GET",
+            "path": "/recipes/tags",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [],
+            "queryParams": []
+        },
+        {
+            "resource": "recipes",
+            "name": "Get recipes by tag",
+            "method": "GET",
+            "path": "/recipes/tag/{tagName}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "recipes",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "recipes",
+            "name": "Get recipes by meal type",
+            "method": "GET",
+            "path": "/recipes/meal-type/{mealType}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "recipes",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "users",
+            "name": "Get all users",
+            "method": "GET",
+            "path": "/users",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "users",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "limit",
+                "skip",
+                "select",
+                "sortBy",
+                "order"
+            ]
+        },
+        {
+            "resource": "users",
+            "name": "Get a single user",
+            "method": "GET",
+            "path": "/users/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "firstName",
+                "lastName",
+                "email",
+                "phone",
+                "username",
+                "age",
+                "gender"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "users",
+            "name": "Search users",
+            "method": "GET",
+            "path": "/users/search",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "users",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "q"
+            ]
+        },
+        {
+            "resource": "users",
+            "name": "Filter users",
+            "method": "GET",
+            "path": "/users/filter",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "users",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "key",
+                "value"
+            ]
+        },
+        {
+            "resource": "users",
+            "name": "Get user's carts",
+            "method": "GET",
+            "path": "/users/{id}/carts",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "carts",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "users",
+            "name": "Get user's posts",
+            "method": "GET",
+            "path": "/users/{id}/posts",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "posts",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "users",
+            "name": "Get user's todos",
+            "method": "GET",
+            "path": "/users/{id}/todos",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "todos",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "users",
+            "name": "Add a user",
+            "method": "POST",
+            "path": "/users/add",
+            "requiresAuth": false,
+            "requestBody": {
+                "firstName": "John",
+                "lastName": "Doe",
+                "age": 25
+            },
+            "responseFields": [
+                "id",
+                "firstName",
+                "lastName",
+                "age"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "users",
+            "name": "Update a user",
+            "method": "PUT",
+            "path": "/users/{id}",
+            "requiresAuth": false,
+            "requestBody": {
+                "lastName": "Updated"
+            },
+            "responseFields": [
+                "id",
+                "firstName",
+                "lastName"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "users",
+            "name": "Delete a user",
+            "method": "DELETE",
+            "path": "/users/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "firstName",
+                "isDeleted",
+                "deletedOn"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "posts",
+            "name": "Get all posts",
+            "method": "GET",
+            "path": "/posts",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "posts",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "limit",
+                "skip",
+                "select",
+                "sortBy",
+                "order"
+            ]
+        },
+        {
+            "resource": "posts",
+            "name": "Get a single post",
+            "method": "GET",
+            "path": "/posts/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "title",
+                "body",
+                "tags",
+                "reactions",
+                "views",
+                "userId"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "posts",
+            "name": "Search posts",
+            "method": "GET",
+            "path": "/posts/search",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "posts",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "q"
+            ]
+        },
+        {
+            "resource": "posts",
+            "name": "Get posts by user",
+            "method": "GET",
+            "path": "/posts/user/{userId}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "posts",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "posts",
+            "name": "Get post comments",
+            "method": "GET",
+            "path": "/posts/{id}/comments",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "comments",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "posts",
+            "name": "Get all posts tags",
+            "method": "GET",
+            "path": "/posts/tags",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [],
+            "queryParams": []
+        },
+        {
+            "resource": "posts",
+            "name": "Get posts tag list",
+            "method": "GET",
+            "path": "/posts/tag-list",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [],
+            "queryParams": []
+        },
+        {
+            "resource": "posts",
+            "name": "Get posts by tag",
+            "method": "GET",
+            "path": "/posts/tag/{tagName}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "posts",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "posts",
+            "name": "Add a post",
+            "method": "POST",
+            "path": "/posts/add",
+            "requiresAuth": false,
+            "requestBody": {
+                "title": "Post title",
+                "body": "Post body content",
+                "userId": 1
+            },
+            "responseFields": [
+                "id",
+                "title",
+                "body",
+                "userId"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "posts",
+            "name": "Update a post",
+            "method": "PUT",
+            "path": "/posts/{id}",
+            "requiresAuth": false,
+            "requestBody": {
+                "title": "Updated title"
+            },
+            "responseFields": [
+                "id",
+                "title",
+                "body",
+                "userId"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "posts",
+            "name": "Delete a post",
+            "method": "DELETE",
+            "path": "/posts/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "title",
+                "isDeleted",
+                "deletedOn"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "comments",
+            "name": "Get all comments",
+            "method": "GET",
+            "path": "/comments",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "comments",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "limit",
+                "skip"
+            ]
+        },
+        {
+            "resource": "comments",
+            "name": "Get a single comment",
+            "method": "GET",
+            "path": "/comments/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "body",
+                "postId",
+                "likes",
+                "user"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "comments",
+            "name": "Get comments by post",
+            "method": "GET",
+            "path": "/comments/post/{postId}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "comments",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "comments",
+            "name": "Add a comment",
+            "method": "POST",
+            "path": "/comments/add",
+            "requiresAuth": false,
+            "requestBody": {
+                "body": "This is a comment",
+                "postId": 1,
+                "userId": 1
+            },
+            "responseFields": [
+                "id",
+                "body",
+                "postId",
+                "user"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "comments",
+            "name": "Update a comment",
+            "method": "PUT",
+            "path": "/comments/{id}",
+            "requiresAuth": false,
+            "requestBody": {
+                "body": "Updated comment"
+            },
+            "responseFields": [
+                "id",
+                "body",
+                "postId"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "comments",
+            "name": "Delete a comment",
+            "method": "DELETE",
+            "path": "/comments/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "body",
+                "isDeleted",
+                "deletedOn"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "todos",
+            "name": "Get all todos",
+            "method": "GET",
+            "path": "/todos",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "todos",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "limit",
+                "skip"
+            ]
+        },
+        {
+            "resource": "todos",
+            "name": "Get a single todo",
+            "method": "GET",
+            "path": "/todos/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "todo",
+                "completed",
+                "userId"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "todos",
+            "name": "Get random todo",
+            "method": "GET",
+            "path": "/todos/random",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "todo",
+                "completed",
+                "userId"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "todos",
+            "name": "Get todos by user",
+            "method": "GET",
+            "path": "/todos/user/{userId}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "todos",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "todos",
+            "name": "Add a todo",
+            "method": "POST",
+            "path": "/todos/add",
+            "requiresAuth": false,
+            "requestBody": {
+                "todo": "Do something",
+                "completed": false,
+                "userId": 1
+            },
+            "responseFields": [
+                "id",
+                "todo",
+                "completed",
+                "userId"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "todos",
+            "name": "Update a todo",
+            "method": "PUT",
+            "path": "/todos/{id}",
+            "requiresAuth": false,
+            "requestBody": {
+                "completed": true
+            },
+            "responseFields": [
+                "id",
+                "todo",
+                "completed",
+                "userId"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "todos",
+            "name": "Delete a todo",
+            "method": "DELETE",
+            "path": "/todos/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "todo",
+                "isDeleted",
+                "deletedOn"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "quotes",
+            "name": "Get all quotes",
+            "method": "GET",
+            "path": "/quotes",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "quotes",
+                "total",
+                "skip",
+                "limit"
+            ],
+            "queryParams": [
+                "limit",
+                "skip"
+            ]
+        },
+        {
+            "resource": "quotes",
+            "name": "Get a single quote",
+            "method": "GET",
+            "path": "/quotes/{id}",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "quote",
+                "author"
+            ],
+            "queryParams": []
+        },
+        {
+            "resource": "quotes",
+            "name": "Get random quote",
+            "method": "GET",
+            "path": "/quotes/random",
+            "requiresAuth": false,
+            "requestBody": null,
+            "responseFields": [
+                "id",
+                "quote",
+                "author"
+            ],
+            "queryParams": []
+        }
+    ]
+}
