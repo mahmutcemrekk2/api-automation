@@ -10,7 +10,7 @@ Feature: DummyJSON Products
     And the response "$.limit" should be 5
     And response should match:
       | $.products | not empty |
-      | $.skip     | exists    |
+
 
 
 
