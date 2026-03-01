@@ -1430,6 +1430,28 @@ async function commitAndPush() {
     }
 }
 
+async function switchToMainAndPull() {
+    if (!confirm("Are you sure you want to switch to 'main' branch and pull latest changes?\nAny uncommitted changes on this branch will be carried over (if possible). It's best to commit or stash first!")) {
+        return;
+    }
+
+    try {
+        toast('Switching to main and pulling...', 'info');
+        const res = await fetch('/api/git/pull', { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+            toast('Successfully checked out main and pulled latest changes!', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            toast('Pull Failed: ' + (data.error || 'Unknown'), 'error');
+            console.error(data);
+        }
+    } catch (e) {
+        toast('Error: ' + e.message, 'error');
+    }
+}
+
 // ============================================
 // MODALS
 // ============================================

@@ -51,6 +51,7 @@ public class UIServer {
         server.createContext("/api/git/status", UIServer::handleGitStatus);
         server.createContext("/api/git/new-branch", UIServer::handleNewBranch);
         server.createContext("/api/git/commit-push", UIServer::handleCommitPush);
+        server.createContext("/api/git/pull", UIServer::handleGitPull);
         server.createContext("/api/comment-scenario", UIServer::handleCommentScenario);
         server.createContext("/api/delete-scenario", UIServer::handleDeleteScenario);
         server.createContext("/api/reorder-scenario", UIServer::handleReorderScenario);
@@ -736,6 +737,43 @@ public class UIServer {
         if (path.endsWith(".svg"))
             return "image/svg+xml";
         return "text/plain; charset=UTF-8";
+    }
+
+    private static void handleGitPull(HttpExchange exchange) throws IOException {
+        if (!"POST".equals(exchange.getRequestMethod())) {
+            sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
+            return;
+        }
+
+        try {
+            // Ensure we are on main
+            ProcessBuilder pbCheckout = new ProcessBuilder("git", "checkout", "main");
+            pbCheckout.directory(new File("."));
+            Process pCheckout = pbCheckout.start();
+            pCheckout.waitFor();
+
+            // Pull from origin
+            ProcessBuilder pbPull = new ProcessBuilder("git", "pull", "origin", "main");
+            pbPull.directory(new File("."));
+            pbPull.redirectErrorStream(true);
+            Process pPull = pbPull.start();
+
+            String output;
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(pPull.getInputStream(), StandardCharsets.UTF_8))) {
+                output = reader.lines().collect(Collectors.joining("\n"));
+            }
+
+            int exitCode = pPull.waitFor();
+
+            String result = String.format("{\"success\":%s,\"output\":\"%s\"}",
+                    (exitCode == 0), escapeJson(output));
+            sendResponse(exchange, 200, "application/json", result);
+
+        } catch (Exception e) {
+            sendResponse(exchange, 500, "application/json",
+                    "{\"success\":false,\"error\":\"" + escapeJson(e.getMessage()) + "\"}");
+        }
     }
 
     static class FeatureData {
