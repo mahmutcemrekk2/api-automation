@@ -1,0 +1,33 @@
+{
+  "recipes": [
+    {
+      "id": 1,
+      "name": "Classic Margherita Pizza",
+      "ingredients": [
+        "Pizza dough"
+      ],
+      "instructions": [
+        "Preheat the oven to 475\u00b0F (245\u00b0C)."
+      ],
+      "prepTimeMinutes": 20,
+      "cookTimeMinutes": 15,
+      "servings": 4,
+      "difficulty": "Easy",
+      "cuisine": "Italian",
+      "caloriesPerServing": 300,
+      "tags": [
+        "Pizza"
+      ],
+      "userId": 166,
+      "image": "https://cdn.dummyjson.com/recipe-images/1.webp",
+      "rating": 4.6,
+      "reviewCount": 98,
+      "mealType": [
+        "Dinner"
+      ]
+    }
+  ],
+  "total": 25,
+  "skip": 0,
+  "limit": 25
+}

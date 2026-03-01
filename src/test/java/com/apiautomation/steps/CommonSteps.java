@@ -8,9 +8,6 @@ import com.apiautomation.utils.RandomDataGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -57,23 +54,23 @@ public class CommonSteps {
     // ============================================
 
     @Given("system uses {string} service")
-    public void iAmUsingService(String serviceName) {
+    public void systemUsesService(String serviceName) {
         apiClient.setBaseUrl(serviceName);
     }
 
     @Given("user sets header {string} to {string}")
-    public void iSetHeader(String headerName, String headerValue) {
+    public void userSetsHeader(String headerName, String headerValue) {
         apiClient.addHeader(headerName, headerValue);
     }
 
     @Given("user sets the following headers:")
-    public void iSetTheFollowingHeaders(DataTable dataTable) {
+    public void userSetsTheFollowingHeaders(DataTable dataTable) {
         Map<String, String> headers = dataTable.asMap(String.class, String.class);
         headers.forEach((key, value) -> apiClient.addHeader(key, resolver.resolve(value)));
     }
 
     @Given("user is authenticated with token {string}")
-    public void iAmAuthenticatedWithToken(String tokenKey) {
+    public void userIsAuthenticatedWithToken(String tokenKey) {
         String token = context.getString(tokenKey);
         if (token.isEmpty()) {
             throw new IllegalStateException("Token '" + tokenKey + "' not found in context");
@@ -86,7 +83,7 @@ public class CommonSteps {
      * Stores: authToken, userId, firstName in context + sets auth header.
      */
     @Given("user is logged in as default")
-    public void iAmLoggedInAsDefaultUser() {
+    public void userIsLoggedInAsDefaultUser() {
         var config = com.apiautomation.config.EnvironmentConfig.load();
         String username = config.getDefaultUsername();
         String password = config.getDefaultPassword();
@@ -97,7 +94,7 @@ public class CommonSteps {
      * Shortcut step: performs full login flow with custom credentials.
      */
     @Given("user is logged in with username {string} and password {string}")
-    public void iAmLoggedInWithCredentials(String username, String password) {
+    public void userIsLoggedInWithCredentials(String username, String password) {
         String resolvedUser = resolver.resolve(username);
         String resolvedPass = resolver.resolve(password);
         performLogin(resolvedUser, resolvedPass);
@@ -123,7 +120,7 @@ public class CommonSteps {
     }
 
     @Given("user has stored {string} as {string}")
-    public void iHaveStored(String value, String key) {
+    public void userHasStored(String value, String key) {
         context.set(key, resolver.resolve(value));
     }
 
@@ -132,18 +129,18 @@ public class CommonSteps {
     // ============================================
 
     @When("user sends {string} request to {string}")
-    public void iSendRequestTo(String method, String endpoint) {
+    public void userSendsRequestTo(String method, String endpoint) {
         executeRequest(method, endpoint, Collections.emptyMap());
     }
 
     @When("user sends {string} request to {string} with query params:")
-    public void iSendRequestWithQueryParams(String method, String endpoint, DataTable dataTable) {
+    public void userSendsRequestWithQueryParams(String method, String endpoint, DataTable dataTable) {
         Map<String, String> params = dataTable.asMap(String.class, String.class);
         executeRequest(method, endpoint, params);
     }
 
     @When("user sends {string} request to {string} with body:")
-    public void iSendRequestWithBody(String method, String endpoint, String body) {
+    public void userSendsRequestWithBody(String method, String endpoint, String body) {
         String resolvedBody = resolver.resolve(body);
         switch (method.toUpperCase()) {
             case "POST" -> apiClient.post(endpoint, resolvedBody);
@@ -154,7 +151,7 @@ public class CommonSteps {
     }
 
     @When("user sends form {string} request to {string} with params:")
-    public void iSendFormRequest(String method, String endpoint, DataTable dataTable) {
+    public void userSendsFormRequest(String method, String endpoint, DataTable dataTable) {
         Map<String, String> params = dataTable.asMap(String.class, String.class);
         Map<String, String> resolvedParams = resolver.resolve(params);
         if ("POST".equalsIgnoreCase(method)) {
@@ -165,7 +162,7 @@ public class CommonSteps {
     }
 
     @When("user sends {string} request to {string} with payload:")
-    public void iSendRequestWithPayload(String method, String endpoint, DataTable dataTable) {
+    public void userSendsRequestWithPayload(String method, String endpoint, DataTable dataTable) {
         Map<String, String> payloadMap = dataTable.asMap(String.class, String.class);
         Map<String, String> resolvedPayload = resolver.resolve(payloadMap);
         try {
@@ -408,12 +405,12 @@ public class CommonSteps {
     // ============================================
 
     @And("user stores response {string} as {string}")
-    public void iStoreAs(String jsonPath, String key) {
+    public void userStoresAs(String jsonPath, String key) {
         context.extractAndStore(jsonPath, key);
     }
 
     @And("user stores response body as {string}")
-    public void iStoreResponseBodyAs(String key) {
+    public void userStoresResponseBodyAs(String key) {
         String body = context.getLastResponse().getBody().asString();
         if (body == null)
             throw new IllegalStateException("No response body available");
@@ -421,13 +418,13 @@ public class CommonSteps {
     }
 
     @And("user stores the following values from the response:")
-    public void iStoreTheFollowingValuesFromTheResponse(DataTable dataTable) {
+    public void userStoresTheFollowingValuesFromTheResponse(DataTable dataTable) {
         Map<String, String> mapping = dataTable.asMap(String.class, String.class);
         mapping.forEach((jsonPath, key) -> context.extractAndStore(jsonPath, key));
     }
 
     @And("user stores the cookie {string} as {string}")
-    public void iStoreTheCookieAs(String cookieName, String key) {
+    public void userStoresTheCookieAs(String cookieName, String key) {
         var response = context.getLastResponse();
         if (response == null)
             throw new IllegalStateException("No response available to extract cookie from");
@@ -470,7 +467,8 @@ public class CommonSteps {
     }
 
     @And("user stores {string} from {string} is {string} as {string}")
-    public void iStoreFieldFromArrayWhere(String targetField, String fieldPath, String filterValue, String storeKey) {
+    public void userStoresFieldFromArrayWhere(String targetField, String fieldPath, String filterValue,
+            String storeKey) {
         String[] parsed = parseArrayFilterPath(fieldPath);
         String arrayPath = parsed[0];
         String filterField = parsed[1];
@@ -491,7 +489,7 @@ public class CommonSteps {
     }
 
     @And("user stores from {string} is {string}:")
-    public void iStoreFieldsFromArrayWhere(String fieldPath, String filterValue, DataTable dataTable) {
+    public void userStoresFieldsFromArrayWhere(String fieldPath, String filterValue, DataTable dataTable) {
         String[] parsed = parseArrayFilterPath(fieldPath);
         String arrayPath = parsed[0];
         String filterField = parsed[1];
@@ -533,7 +531,7 @@ public class CommonSteps {
     // ============================================
 
     @Then("user stores response {string} as global variable {string}")
-    public void iSaveAsGlobalVariable(String valueKey, String globalKey) {
+    public void userSavesAsGlobalVariable(String valueKey, String globalKey) {
         String value = context.getString(valueKey);
         if (value.isEmpty()) {
             throw new IllegalStateException("Value for key '" + valueKey + "' not found in context");
@@ -543,14 +541,14 @@ public class CommonSteps {
     }
 
     @And("user stores value {string} as global variable {string}")
-    public void iStoreValueAsGlobalVariable(String value, String globalKey) {
+    public void userStoresValueAsGlobalVariable(String value, String globalKey) {
         String resolvedValue = resolver.resolve(value);
         GlobalTestState.set(globalKey, resolvedValue);
         logger.info("Stored value '{}' as global variable '{}'", resolvedValue, globalKey);
     }
 
     @Given("system loads global variable {string} as {string}")
-    public void iLoadGlobalVariableAs(String globalKey, String contextKey) {
+    public void systemLoadsGlobalVariableAs(String globalKey, String contextKey) {
         String value = GlobalTestState.get(globalKey);
         if (value == null) {
             throw new IllegalStateException("Global variable '" + globalKey + "' not found");
@@ -563,101 +561,57 @@ public class CommonSteps {
     // SCHEMA VALIDATION
     // ============================================
 
-    @Then("the response should match JSON schema {string}")
-    public void theResponseShouldMatchJsonSchema(String schemaFileName) {
+    @Then("the response should match JSON schema example {string}")
+    public void theResponseShouldMatchJsonSchemaExample(String exampleFileName) throws Exception {
         String responseBody = context.getLastResponse().getBody().asString();
-        if (responseBody == null)
-            throw new IllegalStateException("No response body available for schema validation");
-
-        InputStream schemaStream = getClass().getClassLoader().getResourceAsStream("schemas/" + schemaFileName);
-        if (schemaStream == null) {
-            throw new IllegalArgumentException("Schema file not found: schemas/" + schemaFileName);
+        if (responseBody == null || responseBody.isEmpty()) {
+            throw new RuntimeException("No response body available for JSON schema example validation");
         }
 
-        try {
-            var schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
-            var schema = schemaFactory.getSchema(schemaStream);
-            JsonNode jsonNode = objectMapper.readTree(responseBody);
-
-            Set<ValidationMessage> errors = schema.validate(jsonNode);
-
-            if (!errors.isEmpty()) {
-                List<ValidationMessage> criticalErrors = errors.stream()
-                        .filter(e -> !e.getMessage().contains("additionalProperties")
-                                && !e.getMessage().contains("is not defined in the schema"))
-                        .toList();
-
-                List<ValidationMessage> warnings = errors.stream()
-                        .filter(e -> e.getMessage().contains("additionalProperties")
-                                || e.getMessage().contains("is not defined in the schema"))
-                        .toList();
-
-                if (!criticalErrors.isEmpty()) {
-                    String errorMessages = criticalErrors.stream()
-                            .map(e -> "- " + e.getMessage())
-                            .reduce((a, b) -> a + "\n" + b)
-                            .orElse("");
-                    Allure.addAttachment("Schema Validation Errors", "text/plain", errorMessages, ".txt");
-                    attachAsJson("Response Body", responseBody);
-                    fail("JSON Schema validation failed:\n" + errorMessages);
-                }
-
-                if (!warnings.isEmpty()) {
-                    String warningMessages = warnings.stream()
-                            .map(ValidationMessage::getMessage)
-                            .reduce((a, b) -> a + "\n" + b)
-                            .orElse("");
-                    logger.warn("Schema has unknown properties (marking as BROKEN):\n{}", warningMessages);
-                    Allure.addAttachment("Schema Validation Warnings", "text/plain",
-                            "Unknown properties detected - Schema needs update:\n" + warningMessages, ".txt");
-                    attachAsJson("Response Body", responseBody);
-                    throw new RuntimeException("Schema has unknown properties (needs update):\n" + warningMessages);
-                }
+        try (InputStream exampleStream = getClass().getClassLoader()
+                .getResourceAsStream("schemas/" + exampleFileName)) {
+            if (exampleStream == null) {
+                throw new IllegalArgumentException("Example file not found: schemas/" + exampleFileName);
             }
 
-            logger.info("Response matches schema: {}", schemaFileName);
-            Allure.addAttachment("Schema Validation", "text/plain",
-                    "✓ Response matches schema: " + schemaFileName, ".txt");
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Schema validation error", e);
-        }
-    }
-
-    @Then("the response structure should match example {string}")
-    public void theResponseStructureShouldMatchExample(String exampleFileName) {
-        String responseBody = context.getLastResponse().getBody().asString();
-        if (responseBody == null)
-            throw new IllegalStateException("No response body for structure validation");
-
-        InputStream exampleStream = getClass().getClassLoader().getResourceAsStream("schemas/" + exampleFileName);
-        if (exampleStream == null) {
-            throw new IllegalArgumentException("Example file not found: schemas/" + exampleFileName);
-        }
-
-        try {
             JsonNode exampleJson = objectMapper.readTree(exampleStream);
             JsonNode responseJson = objectMapper.readTree(responseBody);
 
             List<String> errors = new ArrayList<>();
-            validateStructure(exampleJson, responseJson, "$", errors);
+            List<String> warnings = new ArrayList<>();
+            validateOpenApiExample(exampleJson, responseJson, "$", errors, warnings);
 
             if (!errors.isEmpty()) {
-                String errorMessages = errors.stream()
-                        .map(e -> "- " + e)
-                        .reduce((a, b) -> a + "\n" + b)
-                        .orElse("");
-                Allure.addAttachment("Structure Validation Errors", "text/plain", errorMessages, ".txt");
+                StringBuilder errorMessages = new StringBuilder();
+                for (String error : errors) {
+                    errorMessages.append("- ").append(error).append("\n");
+                }
+                Allure.addAttachment("JSON Schema Example Validation Errors", "text/plain", errorMessages.toString(),
+                        ".txt");
                 attachAsJson("Response Body", responseBody);
-                fail("Structure validation failed:\n" + errorMessages);
+                attachAsJson("Expected Example", exampleJson.toString());
+                fail("JSON schema example validation failed:\n" + errorMessages.toString());
             }
 
-            logger.info("Response structure matches example: {}", exampleFileName);
-        } catch (AssertionError e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Structure validation error", e);
+            if (!warnings.isEmpty()) {
+                StringBuilder warningMessages = new StringBuilder();
+                for (String warning : warnings) {
+                    warningMessages.append("- ").append(warning).append("\n");
+                }
+                logger.warn("Response has extra properties not in JSON schema example (marking as BROKEN):\n{}",
+                        warningMessages);
+
+                Allure.addAttachment("JSON Schema Example Validation Warnings", "text/plain",
+                        "Extra properties detected - Example needs update:\n" + warningMessages.toString(), ".txt");
+                attachAsJson("Response Body", responseBody);
+                attachAsJson("Expected Example", exampleJson.toString());
+                throw new RuntimeException("Response has extra properties not in JSON schema example (needs update):\n"
+                        + warningMessages.toString());
+            }
+
+            logger.info("Response matches JSON schema example: {}", exampleFileName);
+            Allure.addAttachment("JSON Schema Example Validation", "text/plain",
+                    "✓ Response matches JSON schema example: " + exampleFileName, ".txt");
         }
     }
 
@@ -666,27 +620,27 @@ public class CommonSteps {
     // ============================================
 
     @Given("I generate a random phone number as {string}")
-    public void iGenerateARandomPhoneNumberAs(String variableName) {
+    public void userGeneratesARandomPhoneNumberAs(String variableName) {
         context.set(variableName, RandomDataGenerator.generatePhoneNumber());
     }
 
     @Given("I generate a random email as {string}")
-    public void iGenerateARandomEmailAs(String variableName) {
+    public void userGeneratesARandomEmailAs(String variableName) {
         context.set(variableName, RandomDataGenerator.generateEmail());
     }
 
     @Given("I generate a random slug as {string}")
-    public void iGenerateARandomSlugAs(String variableName) {
+    public void userGeneratesARandomSlugAs(String variableName) {
         context.set(variableName, RandomDataGenerator.generateSlug());
     }
 
     @Given("I generate a random timestamp as {string}")
-    public void iGenerateARandomTimestampAs(String variableName) {
+    public void userGeneratesARandomTimestampAs(String variableName) {
         context.set(variableName, RandomDataGenerator.generateTimestamp());
     }
 
     @Given("I generate a random {int} digit number as {string}")
-    public void iGenerateARandomDigitNumberAs(int length, String variableName) {
+    public void userGeneratesARandomDigitNumberAs(int length, String variableName) {
         context.set(variableName, RandomDataGenerator.generateRandomNumber(length));
     }
 
@@ -695,7 +649,7 @@ public class CommonSteps {
     // ============================================
 
     @And("system waits for {long} seconds")
-    public void iWaitForSeconds(long seconds) {
+    public void systemWaitsForSeconds(long seconds) {
         try {
             Thread.sleep(seconds * 1000);
         } catch (InterruptedException e) {
@@ -826,18 +780,38 @@ public class CommonSteps {
         return checkFieldExistsRecursive(node.get(segment), segments, index + 1);
     }
 
-    private void validateStructure(JsonNode expected, JsonNode actual, String path, List<String> errors) {
+    private void validateOpenApiExample(JsonNode expected, JsonNode actual, String path, List<String> errors,
+            List<String> warnings) {
         if (expected.isObject() && actual.isObject()) {
-            expected.fieldNames().forEachRemaining(fieldName -> {
-                JsonNode expectedField = expected.get(fieldName);
-                JsonNode actualField = actual.get(fieldName);
-                if (actualField != null && !actualField.isNull()) {
-                    validateStructure(expectedField, actualField, path + "." + fieldName, errors);
+            Iterator<Map.Entry<String, JsonNode>> expectedFields = expected.fields();
+            while (expectedFields.hasNext()) {
+                Map.Entry<String, JsonNode> expectedEntry = expectedFields.next();
+                String fieldName = expectedEntry.getKey();
+                JsonNode expectedFieldNode = expectedEntry.getValue();
+                JsonNode actualFieldNode = actual.get(fieldName);
+
+                if (actualFieldNode == null || actualFieldNode.isMissingNode()) {
+                    errors.add(path + "." + fieldName + ": missing field in response");
+                } else {
+                    validateOpenApiExample(expectedFieldNode, actualFieldNode, path + "." + fieldName, errors,
+                            warnings);
                 }
-            });
+            }
+
+            Iterator<String> actualFieldNames = actual.fieldNames();
+            while (actualFieldNames.hasNext()) {
+                String actualFieldName = actualFieldNames.next();
+                if (!expected.has(actualFieldName)) {
+                    warnings.add(
+                            path + "." + actualFieldName + ": extra property found in response but not in example");
+                }
+            }
         } else if (expected.isArray() && actual.isArray()) {
             if (!expected.isEmpty() && !actual.isEmpty()) {
-                validateStructure(expected.get(0), actual.get(0), path + "[0]", errors);
+                JsonNode expectedItem = expected.get(0);
+                for (int i = 0; i < actual.size(); i++) {
+                    validateOpenApiExample(expectedItem, actual.get(i), path + "[" + i + "]", errors, warnings);
+                }
             }
         } else if (expected.isObject() && !actual.isObject()) {
             errors.add(path + ": expected object but got " + actual.getNodeType());

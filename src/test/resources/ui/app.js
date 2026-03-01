@@ -22,7 +22,120 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderDashboard();
     addFlowStep(); // Start with one step
     loadGitStatus();
+    renderStepLibrary();
 });
+
+// ============================================
+// STEP LIBRARY DATA
+// ============================================
+const STEP_LIBRARY = [
+    { category: 'Auth', icon: '🔐', gherkin: 'Given system uses "{service}" service', desc: 'Set the target API service' },
+    { category: 'Auth', icon: '🔐', gherkin: 'Given user sets header "{name}" to "{value}"', desc: 'Set a custom request header' },
+    { category: 'Auth', icon: '🔐', gherkin: 'Given user sets the following headers:', desc: 'Set multiple headers (table)' },
+    { category: 'Auth', icon: '🔐', gherkin: 'Given user is authenticated with token "{tokenKey}"', desc: 'Authenticate with stored token' },
+    { category: 'Auth', icon: '🔐', gherkin: 'Given user is logged in as default', desc: 'Login with config credentials' },
+    { category: 'Auth', icon: '🔐', gherkin: 'Given user is logged in with username "{user}" and password "{pass}"', desc: 'Login with custom credentials' },
+    { category: 'Auth', icon: '🔐', gherkin: 'Given user has stored "{value}" as "{key}"', desc: 'Pre-store a value in context' },
+    { category: 'HTTP', icon: '🌐', gherkin: 'When user sends "{METHOD}" request to "{/path}"', desc: 'Send a simple HTTP request' },
+    { category: 'HTTP', icon: '🌐', gherkin: 'When user sends "{METHOD}" request to "{/path}" with query params:', desc: 'Send request with query parameters (table)' },
+    { category: 'HTTP', icon: '🌐', gherkin: 'When user sends "{METHOD}" request to "{/path}" with body:', desc: 'Send request with JSON body' },
+    { category: 'HTTP', icon: '🌐', gherkin: 'When user sends form "{METHOD}" request to "{/path}" with params:', desc: 'Send form-encoded request' },
+    { category: 'HTTP', icon: '🌐', gherkin: 'When user sends "{METHOD}" request to "{/path}" with payload:', desc: 'Send request with key-value payload (table)' },
+    { category: 'Assertions', icon: '✅', gherkin: 'Then response status code should be {200}', desc: 'Validate HTTP status code' },
+    { category: 'Assertions', icon: '✅', gherkin: 'Then the response "{$.field}" should be "{value}"', desc: 'Assert field equals string' },
+    { category: 'Assertions', icon: '✅', gherkin: 'Then the response "{$.field}" should be {number}', desc: 'Assert field equals integer' },
+    { category: 'Assertions', icon: '✅', gherkin: 'Then the response "{$.field}" should match regex "{pattern}"', desc: 'Assert field matches regex' },
+    { category: 'Assertions', icon: '✅', gherkin: 'Then the response "{$.field}" should contain "{substring}"', desc: 'Assert field contains text' },
+    { category: 'Assertions', icon: '✅', gherkin: 'Then response should match:', desc: 'Batch assert fields (exists/not empty/null)' },
+    { category: 'Assertions', icon: '✅', gherkin: 'Then the response should match JSON schema example "{example.json}"', desc: 'Validate response against JSON schema example (with extra property detection)' },
+    { category: 'Assertions', icon: '✅', gherkin: 'Then the response item in "{$.array}" is "{filterVal}" should have:', desc: 'Assert filtered array item fields' },
+    { category: 'Data', icon: '📦', gherkin: 'And user stores response "{$.field}" as "{varName}"', desc: 'Store a response value' },
+    { category: 'Data', icon: '📦', gherkin: 'And user stores response body as "{varName}"', desc: 'Store entire response body' },
+    { category: 'Data', icon: '📦', gherkin: 'And user stores the following values from the response:', desc: 'Store multiple values (table)' },
+    { category: 'Data', icon: '📦', gherkin: 'And user stores the cookie "{cookieName}" as "{varName}"', desc: 'Store a response cookie' },
+    { category: 'Data', icon: '📦', gherkin: 'And user stores "{targetField}" from "{$.array}" is "{filterVal}" as "{varName}"', desc: 'Store field from filtered array' },
+    { category: 'Data', icon: '📦', gherkin: 'Then user stores response "{$.field}" as global variable "{globalKey}"', desc: 'Save to global variable' },
+    { category: 'Data', icon: '📦', gherkin: 'Given system loads global variable "{globalKey}" as "{localKey}"', desc: 'Load global variable into context' },
+    { category: 'Utilities', icon: '⚙️', gherkin: 'Given user generates a random phone number as "{varName}"', desc: 'Generate random phone number' },
+    { category: 'Utilities', icon: '⚙️', gherkin: 'Given user generates a random email as "{varName}"', desc: 'Generate random email address' },
+    { category: 'Utilities', icon: '⚙️', gherkin: 'Given user generates a random slug as "{varName}"', desc: 'Generate random URL slug' },
+    { category: 'Utilities', icon: '⚙️', gherkin: 'Given user generates a random timestamp as "{varName}"', desc: 'Generate random timestamp' },
+    { category: 'Utilities', icon: '⚙️', gherkin: 'Given user generates a random {N} digit number as "{varName}"', desc: 'Generate random N-digit number' },
+    { category: 'Utilities', icon: '⚙️', gherkin: 'And system waits for {N} seconds', desc: 'Wait/sleep for N seconds' },
+];
+
+const CATEGORY_COLORS = {
+    'Auth': '#f59e0b',
+    'HTTP': '#3b82f6',
+    'Assertions': '#10b981',
+    'Data': '#8b5cf6',
+    'Utilities': '#ef4444'
+};
+
+function renderStepLibrary(filter = '') {
+    const container = document.getElementById('stepLibraryList');
+    if (!container) return;
+
+    const lowerFilter = filter.toLowerCase();
+    const categories = {};
+
+    STEP_LIBRARY.forEach(s => {
+        if (lowerFilter && !s.gherkin.toLowerCase().includes(lowerFilter) && !s.desc.toLowerCase().includes(lowerFilter) && !s.category.toLowerCase().includes(lowerFilter)) return;
+        if (!categories[s.category]) categories[s.category] = [];
+        categories[s.category].push(s);
+    });
+
+    if (Object.keys(categories).length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:12px; text-align:center; padding:20px;">No steps match your search.</p>';
+        return;
+    }
+
+    container.innerHTML = Object.entries(categories).map(([cat, steps]) => `
+        <div class="step-lib-category">
+            <div class="step-lib-cat-header" style="border-left: 3px solid ${CATEGORY_COLORS[cat] || '#666'}; padding-left:8px; margin-bottom:6px;">
+                <span style="font-size:12px; font-weight:600; color:${CATEGORY_COLORS[cat] || '#ccc'}">${steps[0].icon} ${cat}</span>
+                <span style="font-size:10px; color:var(--text-muted); margin-left:6px;">(${steps.length})</span>
+            </div>
+            ${steps.map(s => `
+                <div class="step-lib-item" onclick="copyStepToClipboard(this, '${escHtml(s.gherkin)}')" title="${escHtml(s.desc)}\n\nClick to copy to clipboard">
+                    <code>${escHtml(s.gherkin)}</code>
+                    <span class="step-lib-desc">${escHtml(s.desc)}</span>
+                </div>
+            `).join('')}
+        </div>
+    `).join('');
+}
+
+function filterStepLibrary(value) {
+    renderStepLibrary(value);
+}
+
+function toggleStepLibrary() {
+    const body = document.getElementById('stepLibraryBody');
+    const toggle = document.getElementById('stepLibraryToggle');
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        toggle.textContent = '▼';
+    } else {
+        body.style.display = 'none';
+        toggle.textContent = '▶';
+    }
+}
+
+function copyStepToClipboard(el, text) {
+    // Unescape HTML entities back
+    const tmp = document.createElement('textarea');
+    tmp.innerHTML = text;
+    const cleanText = tmp.value;
+
+    // Insert into the active flow step
+    insertLibraryStep(cleanText);
+
+    // Also copy to clipboard
+    navigator.clipboard.writeText('        ' + cleanText).catch(() => { });
+    el.classList.add('copied');
+    setTimeout(() => el.classList.remove('copied'), 1500);
+}
 
 async function loadData() {
     try {
@@ -280,6 +393,17 @@ function renderSetupSteps() {
 }
 
 // ============================================
+const DEFAULT_SECTION_ORDER = ['loadGlobals', 'customSteps', 'configuration', 'endpoint', 'expectedStatus', 'requestBody', 'storeFields', 'saveGlobals', 'assertions'];
+
+// Request type options built from HTTP steps in STEP_LIBRARY
+const REQUEST_TYPES = [
+    { key: 'simple', label: 'Simple Request', gherkin: 'When user sends "{METHOD}" request to "{/path}"' },
+    { key: 'withBody', label: 'With JSON Body', gherkin: 'When user sends "{METHOD}" request to "{/path}" with body:' },
+    { key: 'withQuery', label: 'With Query Params', gherkin: 'When user sends "{METHOD}" request to "{/path}" with query params:' },
+    { key: 'formParams', label: 'Form-Encoded with Params', gherkin: 'When user sends form "{METHOD}" request to "{/path}" with params:' },
+    { key: 'withPayload', label: 'With Key-Value Payload', gherkin: 'When user sends "{METHOD}" request to "{/path}" with payload:' },
+];
+
 function addFlowStep() {
     const stepId = stepIdCounter++;
     const step = {
@@ -289,195 +413,437 @@ function addFlowStep() {
         method: 'GET',
         path: '',
         requestBody: '',
+        requestType: 'simple',
+        responseExample: '',
         expectedStatus: 200,
         loadGlobals: [],
         storeFields: [],
         saveGlobals: [],
-        assertions: []
+        assertions: [],
+        customSteps: [],
+        sectionOrder: [...DEFAULT_SECTION_ORDER]
     };
     flowSteps.push(step);
     renderFlowSteps();
 }
-
 function removeFlowStep(stepId) {
     flowSteps = flowSteps.filter(s => s.id !== stepId);
     renderFlowSteps();
 }
 
+const SECTION_META = {
+    loadGlobals: { icon: '📥', label: 'Load Global Variables' },
+    customSteps: { icon: '📚', label: 'Custom Steps (Pre-Request)' },
+    configuration: { icon: '⚙️', label: 'Configuration' },
+    endpoint: { icon: '🌐', label: 'Endpoint' },
+    expectedStatus: { icon: '📊', label: 'Expected Status' },
+    requestBody: { icon: '📝', label: 'Request Body' },
+    storeFields: { icon: '💾', label: 'Store Response Values' },
+    saveGlobals: { icon: '🔒', label: 'Save Global Variables' },
+    assertions: { icon: '✅', label: 'Validate Response' }
+};
+
+function renderSection(key, step, n) {
+    const meta = SECTION_META[key];
+    if (!meta) return '';
+
+    // Skip requestBody for non-write methods
+    if (key === 'requestBody' && !['POST', 'PUT', 'PATCH'].includes(step.method)) return '';
+
+    const mandatorySections = ['endpoint', 'expectedStatus', 'assertions'];
+    const isMandatory = mandatorySections.includes(key);
+
+    const endpoints = getUncoveredEndpoints();
+    let body = '';
+
+    switch (key) {
+        case 'loadGlobals':
+            body = `
+            <div class="kv-pairs" id="load-global-${step.id}">
+                ${(step.loadGlobals || []).map((lg, i) => `
+                <div class="kv-row">
+                    <input type="text" placeholder="Global Variable Name" value="${lg.globalKey}"
+                           onchange="updateLoadGlobal(${step.id},${i},'globalKey',this.value)">
+                    <span class="arrow">→</span>
+                    <input type="text" placeholder="Local Variable Name" value="${lg.localKey}"
+                           onchange="updateLoadGlobal(${step.id},${i},'localKey',this.value)">
+                    <button class="remove-btn" onclick="removeLoadGlobal(${step.id},${i})">✕</button>
+                </div>`).join('')}
+            </div>
+            <button class="add-row-btn" onclick="addLoadGlobal(${step.id})">+ Add Load Global Variable</button>`;
+            break;
+
+        case 'customSteps':
+            body = `
+            <div id="custom-steps-${step.id}">
+                ${(step.customSteps || []).map((cs, i) => {
+                const csObj = typeof cs === 'string' ? { gherkin: cs, params: extractParams(cs) } : cs;
+                const paramInputs = (csObj.params || []).map((p, pi) => `
+                        <div class="custom-param-row">
+                            <span class="param-label">${escHtml(p.name)}</span>
+                            <input type="text" placeholder="Enter value" value="${escHtml(p.value || '')}"
+                                   onchange="updateCustomStepParam(${step.id},${i},${pi},this.value)"
+                                   style="font-family:'JetBrains Mono',monospace; font-size:11px; flex:1;">
+                        </div>
+                    `).join('');
+                return `
+                    <div class="custom-step-card">
+                        <div class="custom-step-header">
+                            <code>${escHtml(csObj.gherkin)}</code>
+                            <button class="remove-btn" onclick="removeCustomStep(${step.id},${i})">✕</button>
+                        </div>
+                        ${paramInputs ? `<div class="custom-param-list">${paramInputs}</div>` : ''}
+                    </div>`;
+            }).join('')}
+            </div>
+            <button class="add-row-btn" onclick="addCustomStepManual(${step.id})">+ Add Custom Step</button>
+            <p style="font-size:10px; color:var(--text-muted); margin-top:4px">💡 Click any step in 📚 Step Library to insert here</p>`;
+            break;
+
+        case 'configuration':
+            body = `
+            <div class="step-row" style="gap:16px">
+                <div style="flex:1">
+                    <select onchange="updateStep(${step.id},'service',this.value)" style="margin-bottom:6px">
+                        <option value="dummyjson" selected>dummyjson</option>
+                    </select>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="login-${step.id}" ${step.loginRequired ? 'checked' : ''}
+                           onchange="updateStep(${step.id},'loginRequired',this.checked)">
+                    <label for="login-${step.id}">Login Required</label>
+                </div>
+            </div>`;
+            break;
+
+        case 'endpoint':
+            body = `
+            <div class="step-row" style="margin-bottom:8px">
+                <select style="flex:1" onchange="updateStep(${step.id},'requestType',this.value)">
+                    ${REQUEST_TYPES.map(rt => `
+                        <option value="${rt.key}" ${(step.requestType || 'simple') === rt.key ? 'selected' : ''}>
+                            ${rt.label}
+                        </option>
+                    `).join('')}
+                </select>
+            </div>
+            <p style="font-size:10px; color:var(--text-muted); margin-bottom:8px; font-family:'JetBrains Mono',monospace">
+                ${escHtml(REQUEST_TYPES.find(rt => rt.key === (step.requestType || 'simple'))?.gherkin || '')}
+            </p>
+            <div class="step-row">
+                <select style="width:110px" onchange="updateStep(${step.id},'method',this.value)">
+                    <option value="GET" ${step.method === 'GET' ? 'selected' : ''}>GET</option>
+                    <option value="POST" ${step.method === 'POST' ? 'selected' : ''}>POST</option>
+                    <option value="PUT" ${step.method === 'PUT' ? 'selected' : ''}>PUT</option>
+                    <option value="DELETE" ${step.method === 'DELETE' ? 'selected' : ''}>DELETE</option>
+                    <option value="PATCH" ${step.method === 'PATCH' ? 'selected' : ''}>PATCH</option>
+                </select>
+                <select onchange="selectEndpoint(${step.id},this.value)">
+                    <option value="">-- Select Endpoint --</option>
+                    ${groupEndpoints(endpoints).map(g =>
+                `<optgroup label="${g.resource.toUpperCase()}">
+                            ${g.items.map(ep =>
+                    `<option value="${ep.method}|${ep.path}" ${step.method === ep.method && step.path === ep.path ? 'selected' : ''}>
+                                    ${ep.method} ${ep.path} — ${ep.name}
+                                </option>`
+                ).join('')}
+                        </optgroup>`
+            ).join('')}
+                </select>
+            </div>
+            <div style="margin-top:6px">
+                <input type="text" placeholder="/custom/path or use dropdown above"
+                       value="${step.path}" onchange="updateStep(${step.id},'path',this.value)">
+            </div>`;
+            break;
+
+        case 'expectedStatus':
+            body = `
+            <div class="step-row">
+                <input type="number" value="${step.expectedStatus || 200}" onchange="updateStep(${step.id},'expectedStatus', parseInt(this.value, 10))" style="width:100px;">
+            </div>`;
+            break;
+
+        case 'requestBody':
+            body = `
+            <textarea placeholder='{"key": "value"}'
+                      onchange="updateStep(${step.id},'requestBody',this.value)">${step.requestBody}</textarea>`;
+            break;
+
+        case 'storeFields':
+            body = `
+            <div class="kv-pairs" id="store-${step.id}">
+                ${(step.storeFields || []).map((sf, i) => `
+                <div class="kv-row">
+                    <input type="text" placeholder="$.field" value="${sf.path}"
+                           onchange="updateStoreField(${step.id},${i},'path',this.value)">
+                    <span class="arrow">→</span>
+                    <input type="text" placeholder="variableName" value="${sf.key}"
+                           onchange="updateStoreField(${step.id},${i},'key',this.value)">
+                    <button class="remove-btn" onclick="removeStoreField(${step.id},${i})">✕</button>
+                </div>`).join('')}
+            </div>
+            <button class="add-row-btn" onclick="addStoreField(${step.id})">+ Add Store Field</button>`;
+            break;
+
+        case 'saveGlobals':
+            body = `
+            <div class="kv-pairs" id="save-global-${step.id}">
+                ${(step.saveGlobals || []).map((sg, i) => `
+                <div class="kv-row">
+                    <input type="text" placeholder="$.field" value="${sg.path}"
+                           onchange="updateSaveGlobal(${step.id},${i},'path',this.value)">
+                    <span class="arrow">→</span>
+                    <input type="text" placeholder="Global Variable Name" value="${sg.globalKey}"
+                           onchange="updateSaveGlobal(${step.id},${i},'globalKey',this.value)">
+                    <button class="remove-btn" onclick="removeSaveGlobal(${step.id},${i})">✕</button>
+                </div>`).join('')}
+            </div>
+            <button class="add-row-btn" onclick="addSaveGlobal(${step.id})">+ Add Save Global Variable</button>`;
+            break;
+
+        case 'assertions':
+            body = `
+            <div style="margin-bottom:10px">
+                <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px">📋 JSON Schema Example File</label>
+                <input type="text" placeholder="example_response.json (auto-filled from endpoint)"
+                       value="${step.responseExample || ''}"
+                       onchange="updateStep(${step.id},'responseExample',this.value)"
+                       style="font-family:'JetBrains Mono',monospace; font-size:11px;">
+            </div>
+            <div id="assert-${step.id}">
+                ${(step.assertions || []).map((a, i) => `
+                <div class="assertion-row">
+                    <input type="text" placeholder="$.field" value="${a.path}"
+                           onchange="updateAssertion(${step.id},${i},'path',this.value)">
+                    <select onchange="updateAssertion(${step.id},${i},'condition',this.value)">
+                        <option value="exists" ${a.condition === 'exists' ? 'selected' : ''}>exists</option>
+                        <option value="not empty" ${a.condition === 'not empty' ? 'selected' : ''}>not empty</option>
+                        <option value="null" ${a.condition === 'null' ? 'selected' : ''}>null</option>
+                        <option value="equals" ${a.condition === 'equals' ? 'selected' : ''}>equals</option>
+                        <option value="contains" ${a.condition === 'contains' ? 'selected' : ''}>contains</option>
+                        <option value="matches" ${a.condition === 'matches' ? 'selected' : ''}>matches regex</option>
+                    </select>
+                    <input type="text" placeholder="Expected Value" value="${escHtml(a.value || '')}"
+                           onchange="updateAssertion(${step.id},${i},'value',this.value)"
+                           style="display: ${['equals', 'contains', 'matches'].includes(a.condition) ? 'inline-block' : 'none'}; flex:1; min-width:80px;">
+                    <button class="remove-btn" onclick="removeAssertion(${step.id},${i})">✕</button>
+                </div>`).join('')}
+            </div>
+            <button class="add-row-btn" onclick="addAssertion(${step.id})">+ Add Assertion</button>`;
+            break;
+    }
+
+    return `
+    <div class="section-card" data-section-key="${key}" data-step-id="${step.id}">
+        <div class="section-drag-handle" draggable="true" title="Drag to reorder section">⠿</div>
+        <div class="step-label">
+            <div class="step-number">${n}</div>
+            <span>${meta.icon} ${meta.label}</span>
+        </div>
+        ${!isMandatory ? `<button class="remove-btn" style="position:absolute; top:8px; right:8px;" onclick="removeSection(${step.id}, '${key}')" title="Remove Section">✕</button>` : ''}
+        ${body}
+    </div>`;
+}
+
+function removeSection(stepId, key) {
+    const step = flowSteps.find(s => s.id === stepId);
+    if (step && step.sectionOrder) {
+        step.sectionOrder = step.sectionOrder.filter(k => k !== key);
+        renderFlowSteps();
+    }
+}
+
+function addSection(stepId, key) {
+    const step = flowSteps.find(s => s.id === stepId);
+    if (step && step.sectionOrder) {
+        if (!step.sectionOrder.includes(key)) {
+            step.sectionOrder.push(key);
+            renderFlowSteps();
+        }
+    }
+}
+
 function renderFlowSteps() {
     const container = document.getElementById('builderSteps');
     container.innerHTML = flowSteps.map((step, idx) => {
-        const endpoints = getUncoveredEndpoints();
-        const allEndpoints = registry.endpoints || [];
+        if (!step.sectionOrder) step.sectionOrder = [...DEFAULT_SECTION_ORDER];
+
+        let n = 0;
+        const sectionHtml = step.sectionOrder.map(key => {
+            const html = renderSection(key, step, ++n);
+            if (!html) n--; // Don't count skipped sections
+            return html;
+        }).join('');
+
+        const missingSections = DEFAULT_SECTION_ORDER.filter(k => !step.sectionOrder.includes(k));
+        const addSectionHtml = missingSections.length > 0 ? `
+            <div style="margin-top: 10px; text-align: center;">
+                <select style="width: auto; display: inline-block; padding: 4px; font-size: 11px;" onchange="if(this.value) { addSection(${step.id}, this.value); this.value=''; }">
+                    <option value="">+ Add Removed Section</option>
+                    ${missingSections.map(k => `<option value="${k}">${SECTION_META[k].icon} ${SECTION_META[k].label}</option>`).join('')}
+                </select>
+            </div>
+        ` : '';
 
         return `
-        <div class="flow-step" data-step-id="${step.id}">
+        <div class="flow-step" data-step-id="${step.id}" data-step-idx="${idx}">
+            <div class="drag-handle" draggable="true" title="Drag to reorder flow">≡</div>
             ${flowSteps.length > 1 ? `<button class="remove-step" onclick="removeFlowStep(${step.id})">✕</button>` : ''}
-
-            <!-- Load Global Variables -->
-            <div class="step-group">
-                <div class="step-label">
-                    <div class="step-number">${idx + 1}</div>
-                    <span>Load Global Variables</span>
-                </div>
-                <div class="kv-pairs" id="load-global-${step.id}">
-                    ${(step.loadGlobals || []).map((lg, i) => `
-                    <div class="kv-row">
-                        <input type="text" placeholder="Global Variable Name" value="${lg.globalKey}"
-                               onchange="updateLoadGlobal(${step.id},${i},'globalKey',this.value)">
-                        <span class="arrow">→</span>
-                        <input type="text" placeholder="Local Variable Name" value="${lg.localKey}"
-                               onchange="updateLoadGlobal(${step.id},${i},'localKey',this.value)">
-                        <button class="remove-btn" onclick="removeLoadGlobal(${step.id},${i})">✕</button>
-                    </div>`).join('')}
-                </div>
-                <button class="add-row-btn" onclick="addLoadGlobal(${step.id})">+ Add Load Global Variable</button>
-            </div>
-
-            <!-- Service & Login -->
-            <div class="step-group">
-                <div class="step-label">
-                    <div class="step-number">${idx + 1}.1</div>
-                    <span>Configuration</span>
-                </div>
-                <div class="step-row" style="gap:16px">
-                    <div style="flex:1">
-                        <select onchange="updateStep(${step.id},'service',this.value)" style="margin-bottom:6px">
-                            <option value="dummyjson" selected>dummyjson</option>
-                        </select>
-                    </div>
-                    <div class="checkbox-row">
-                        <input type="checkbox" id="login-${step.id}" ${step.loginRequired ? 'checked' : ''}
-                               onchange="updateStep(${step.id},'loginRequired',this.checked)">
-                        <label for="login-${step.id}">Login Required</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Endpoint Selection -->
-            <div class="step-group">
-                <div class="step-label">
-                    <div class="step-number">${idx + 1}.2</div>
-                    <span>Endpoint</span>
-                </div>
-                <div class="step-row">
-                    <select style="width:110px" onchange="updateStep(${step.id},'method',this.value)">
-                        <option value="GET" ${step.method === 'GET' ? 'selected' : ''}>GET</option>
-                        <option value="POST" ${step.method === 'POST' ? 'selected' : ''}>POST</option>
-                        <option value="PUT" ${step.method === 'PUT' ? 'selected' : ''}>PUT</option>
-                        <option value="DELETE" ${step.method === 'DELETE' ? 'selected' : ''}>DELETE</option>
-                        <option value="PATCH" ${step.method === 'PATCH' ? 'selected' : ''}>PATCH</option>
-                    </select>
-                    <select onchange="selectEndpoint(${step.id},this.value)">
-                        <option value="">-- Select Endpoint --</option>
-                        ${groupEndpoints(endpoints).map(g =>
-            `<optgroup label="${g.resource.toUpperCase()}">
-                                ${g.items.map(ep =>
-                `<option value="${ep.method}|${ep.path}" ${step.method === ep.method && step.path === ep.path ? 'selected' : ''}>
-                                        ${ep.method} ${ep.path} — ${ep.name}
-                                    </option>`
-            ).join('')}
-                            </optgroup>`
-        ).join('')}
-                    </select>
-                </div>
-                <div style="margin-top:6px">
-                    <input type="text" placeholder="/custom/path or use dropdown above"
-                           value="${step.path}" onchange="updateStep(${step.id},'path',this.value)">
-                </div>
-                <div class="step-label" style="margin-top:10px;">
-                    <div class="step-number">${idx + 1}.3</div>
-                    <span>Expected Status</span>
-                </div>
-                <div class="step-row" style="margin-top:6px;">
-                    <input type="number" value="${step.expectedStatus || 200}" onchange="updateStep(${step.id},'expectedStatus', parseInt(this.value, 10))" style="width:100px;">
-                </div>
-            </div>
-
-            <!-- Request Body -->
-            ${['POST', 'PUT', 'PATCH'].includes(step.method) ? `
-            <div class="step-group">
-                <div class="step-label">
-                    <div class="step-number">${idx + 1}.4</div>
-                    <span>Request Body</span>
-                </div>
-                <textarea placeholder='{"key": "value"}'
-                          onchange="updateStep(${step.id},'requestBody',this.value)">${step.requestBody}</textarea>
-            </div>` : ''}
-
-            <!-- Store Response -->
-            <div class="step-group">
-                <div class="step-label">
-                    <div class="step-number">${idx + 1}.5</div>
-                    <span>Store Response Values</span>
-                </div>
-                <div class="kv-pairs" id="store-${step.id}">
-                    ${(step.storeFields || []).map((sf, i) => `
-                    <div class="kv-row">
-                        <input type="text" placeholder="$.field" value="${sf.path}"
-                               onchange="updateStoreField(${step.id},${i},'path',this.value)">
-                        <span class="arrow">→</span>
-                        <input type="text" placeholder="variableName" value="${sf.key}"
-                               onchange="updateStoreField(${step.id},${i},'key',this.value)">
-                        <button class="remove-btn" onclick="removeStoreField(${step.id},${i})">✕</button>
-                    </div>`).join('')}
-                </div>
-                <button class="add-row-btn" onclick="addStoreField(${step.id})">+ Add Store Field</button>
-            </div>
-
-            <!-- Save Global Variables -->
-            <div class="step-group">
-                <div class="step-label">
-                    <div class="step-number">${idx + 1}.6</div>
-                    <span>Save Global Variables</span>
-                </div>
-                <div class="kv-pairs" id="save-global-${step.id}">
-                    ${(step.saveGlobals || []).map((sg, i) => `
-                    <div class="kv-row">
-                        <input type="text" placeholder="$.field" value="${sg.path}"
-                               onchange="updateSaveGlobal(${step.id},${i},'path',this.value)">
-                        <span class="arrow">→</span>
-                        <input type="text" placeholder="Global Variable Name" value="${sg.globalKey}"
-                               onchange="updateSaveGlobal(${step.id},${i},'globalKey',this.value)">
-                        <button class="remove-btn" onclick="removeSaveGlobal(${step.id},${i})">✕</button>
-                    </div>`).join('')}
-                </div>
-                <button class="add-row-btn" onclick="addSaveGlobal(${step.id})">+ Add Save Global Variable</button>
-            </div>
-
-            <!-- Assertions -->
-            <div class="step-group">
-                <div class="step-label">
-                    <div class="step-number">${idx + 1}.7</div>
-                    <span>Validate Response</span>
-                </div>
-                <div id="assert-${step.id}">
-                    ${(step.assertions || []).map((a, i) => `
-                    <div class="assertion-row">
-                        <input type="text" placeholder="$.field" value="${a.path}"
-                               onchange="updateAssertion(${step.id},${i},'path',this.value)">
-                        <select onchange="updateAssertion(${step.id},${i},'condition',this.value)">
-                            <option value="exists" ${a.condition === 'exists' ? 'selected' : ''}>exists</option>
-                            <option value="not empty" ${a.condition === 'not empty' ? 'selected' : ''}>not empty</option>
-                            <option value="null" ${a.condition === 'null' ? 'selected' : ''}>null</option>
-                            <option value="equals" ${a.condition === 'equals' ? 'selected' : ''}>equals</option>
-                            <option value="contains" ${a.condition === 'contains' ? 'selected' : ''}>contains</option>
-                            <option value="matches" ${a.condition === 'matches' ? 'selected' : ''}>matches regex</option>
-                        </select>
-                        <input type="text" placeholder="Expected Value" value="${escHtml(a.value || '')}"
-                               onchange="updateAssertion(${step.id},${i},'value',this.value)"
-                               style="display: ${['equals', 'contains', 'matches'].includes(a.condition) ? 'inline-block' : 'none'}; flex:1; min-width:80px;">
-                        <button class="remove-btn" onclick="removeAssertion(${step.id},${i})">✕</button>
-                    </div>`).join('')}
-                </div>
-                <button class="add-row-btn" onclick="addAssertion(${step.id})">+ Add Assertion</button>
-            </div>
+            <div class="flow-step-header">Flow ${idx + 1}</div>
+            ${sectionHtml}
+            ${addSectionHtml}
         </div>
         ${idx < flowSteps.length - 1 ? '<div class="step-connector">↓</div>' : ''}
         `;
     }).join('');
 
     updatePreview();
+    initFlowDragDrop();
+    initSectionDragDrop();
+}
+
+// ============================================
+// SECTION DRAG & DROP (within a flow step)
+// ============================================
+function initSectionDragDrop() {
+    document.querySelectorAll('.flow-step').forEach(flowCard => {
+        const stepId = parseInt(flowCard.dataset.stepId);
+        const sections = flowCard.querySelectorAll('.section-card');
+        let draggedKey = null;
+
+        sections.forEach(sec => {
+            const handle = sec.querySelector('.section-drag-handle');
+            if (!handle) return;
+
+            handle.addEventListener('dragstart', (e) => {
+                draggedKey = sec.dataset.sectionKey;
+                sec.classList.add('section-dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/section', draggedKey);
+                e.stopPropagation(); // Don't trigger flow-level drag
+            });
+
+            handle.addEventListener('dragend', () => {
+                sec.classList.remove('section-dragging');
+                draggedKey = null;
+                flowCard.querySelectorAll('.section-card').forEach(c => {
+                    c.classList.remove('section-over-top', 'section-over-bottom');
+                });
+            });
+
+            sec.addEventListener('dragover', (e) => {
+                // Only handle section drags, not flow drags
+                if (!e.dataTransfer.types.includes('text/section')) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                const rect = sec.getBoundingClientRect();
+                const mid = rect.top + rect.height / 2;
+                sec.classList.remove('section-over-top', 'section-over-bottom');
+                if (e.clientY < mid) {
+                    sec.classList.add('section-over-top');
+                } else {
+                    sec.classList.add('section-over-bottom');
+                }
+            });
+
+            sec.addEventListener('dragleave', () => {
+                sec.classList.remove('section-over-top', 'section-over-bottom');
+            });
+
+            sec.addEventListener('drop', (e) => {
+                if (!e.dataTransfer.types.includes('text/section')) return;
+                e.preventDefault();
+                e.stopPropagation();
+                const fromKey = e.dataTransfer.getData('text/section');
+                const toKey = sec.dataset.sectionKey;
+                if (fromKey === toKey) return;
+
+                const step = flowSteps.find(s => s.id === stepId);
+                if (!step || !step.sectionOrder) return;
+
+                const fromIdx = step.sectionOrder.indexOf(fromKey);
+                const toIdx = step.sectionOrder.indexOf(toKey);
+                if (fromIdx === -1 || toIdx === -1) return;
+
+                // Remove from old position
+                step.sectionOrder.splice(fromIdx, 1);
+                // Insert at new position (adjust based on drop position)
+                const rect = sec.getBoundingClientRect();
+                const mid = rect.top + rect.height / 2;
+                const insertIdx = e.clientY < mid ? step.sectionOrder.indexOf(toKey) : step.sectionOrder.indexOf(toKey) + 1;
+                step.sectionOrder.splice(insertIdx, 0, fromKey);
+
+                renderFlowSteps();
+                toast('📦 Section reordered!', 'success');
+            });
+        });
+    });
+}
+
+// ============================================
+// FLOW STEP DRAG & DROP
+// ============================================
+function initFlowDragDrop() {
+    const container = document.getElementById('builderSteps');
+    const cards = container.querySelectorAll('.flow-step');
+    let draggedIdx = null;
+
+    cards.forEach(card => {
+        const handle = card.querySelector('.drag-handle');
+        if (!handle) return;
+
+        handle.addEventListener('dragstart', (e) => {
+            draggedIdx = parseInt(card.dataset.stepIdx);
+            card.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', draggedIdx);
+        });
+
+        handle.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            draggedIdx = null;
+            container.querySelectorAll('.flow-step').forEach(c => {
+                c.classList.remove('drag-over-top', 'drag-over-bottom');
+            });
+        });
+
+        card.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const rect = card.getBoundingClientRect();
+            const mid = rect.top + rect.height / 2;
+            card.classList.remove('drag-over-top', 'drag-over-bottom');
+            if (e.clientY < mid) {
+                card.classList.add('drag-over-top');
+            } else {
+                card.classList.add('drag-over-bottom');
+            }
+        });
+
+        card.addEventListener('dragleave', () => {
+            card.classList.remove('drag-over-top', 'drag-over-bottom');
+        });
+
+        card.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const targetIdx = parseInt(card.dataset.stepIdx);
+            if (draggedIdx === null || draggedIdx === targetIdx) return;
+
+            const rect = card.getBoundingClientRect();
+            const mid = rect.top + rect.height / 2;
+            let insertIdx = e.clientY < mid ? targetIdx : targetIdx + 1;
+
+            // Reorder the flowSteps array
+            const [moved] = flowSteps.splice(draggedIdx, 1);
+            if (insertIdx > draggedIdx) insertIdx--;
+            flowSteps.splice(insertIdx, 0, moved);
+
+            draggedIdx = null;
+            renderFlowSteps();
+            toast('Step reordered!', 'success');
+        });
+    });
 }
 
 function groupEndpoints(endpoints) {
@@ -512,6 +878,16 @@ function selectEndpoint(stepId, value) {
             step.assertions = ep.responseFields.slice(0, 4).map(f => ({
                 path: '$.' + f, condition: 'exists'
             }));
+        }
+
+        // Auto-generate response example filename for schema validation
+        if (ep) {
+            const exampleName = path
+                .replace(/^\//, '')
+                .replace(/\{[^}]+\}/g, 'by_id')
+                .replace(/\//g, '_')
+                + '_' + method.toLowerCase() + '.json';
+            step.responseExample = exampleName;
         }
     }
     renderFlowSteps();
@@ -596,6 +972,69 @@ function updateAssertion(stepId, index, field, value) {
     }
 }
 
+// Custom Steps (from Step Library)
+function extractParams(gherkinText) {
+    const matches = [...gherkinText.matchAll(/\{([^}]+)\}/g)];
+    return matches.map(m => ({ name: m[1], value: '' }));
+}
+
+function addCustomStepManual(stepId) {
+    const step = flowSteps.find(s => s.id === stepId);
+    if (step) {
+        if (!step.customSteps) step.customSteps = [];
+        step.customSteps.push({ gherkin: 'And ...', params: [] });
+        renderFlowSteps();
+    }
+}
+function removeCustomStep(stepId, index) {
+    const step = flowSteps.find(s => s.id === stepId);
+    if (step && step.customSteps) { step.customSteps.splice(index, 1); renderFlowSteps(); }
+}
+function updateCustomStepParam(stepId, csIndex, paramIndex, value) {
+    const step = flowSteps.find(s => s.id === stepId);
+    if (step && step.customSteps && step.customSteps[csIndex]) {
+        const cs = step.customSteps[csIndex];
+        if (typeof cs === 'string') {
+            step.customSteps[csIndex] = { gherkin: cs, params: extractParams(cs) };
+        }
+        if (step.customSteps[csIndex].params[paramIndex]) {
+            step.customSteps[csIndex].params[paramIndex].value = value;
+        }
+        updatePreview();
+    }
+}
+function insertLibraryStep(gherkinText) {
+    // Insert into the LAST flow step's customSteps
+    if (flowSteps.length === 0) {
+        toast('No flow steps to insert into. Add a step first!', 'error');
+        return;
+    }
+    const targetStep = flowSteps[flowSteps.length - 1];
+    if (!targetStep.customSteps) targetStep.customSteps = [];
+    targetStep.customSteps.push({ gherkin: gherkinText, params: extractParams(gherkinText) });
+    renderFlowSteps();
+    toast(`📚 Step inserted into Flow ${flowSteps.length}!`, 'success');
+
+    // Scroll to the custom steps section
+    setTimeout(() => {
+        const el = document.getElementById(`custom-steps-${targetStep.id}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 200);
+}
+
+function resolveCustomStepGherkin(csObj) {
+    if (typeof csObj === 'string') return csObj;
+    let text = csObj.gherkin;
+    (csObj.params || []).forEach(p => {
+        if (p.value) {
+            // Replace "{paramName}" (with quotes) or {paramName} (without quotes)
+            text = text.replace(`"{${p.name}}"`, `"${p.value}"`);
+            text = text.replace(`{${p.name}}`, p.value);
+        }
+    });
+    return text;
+}
+
 // ============================================
 // GHERKIN GENERATOR
 // ============================================
@@ -658,57 +1097,112 @@ function generateGherkin() {
     });
 
     flowSteps.forEach((step, idx) => {
-        if (!step.path) return;
+        const order = step.sectionOrder || DEFAULT_SECTION_ORDER;
+        const hasCustomSteps = (step.customSteps || []).some(cs => {
+            if (typeof cs === 'string') return cs && cs.trim();
+            return cs && cs.gherkin && cs.gherkin.trim();
+        });
+        if (!step.path && !hasCustomSteps) return;
         lines.push('');
         if (isFlow) lines.push(`        # Step ${idx + 1}`);
 
-        (step.loadGlobals || []).forEach(lg => {
-            if (lg.globalKey && lg.localKey) {
-                lines.push(`        And system loads global variable "${lg.globalKey}" as "${lg.localKey}"`);
-            }
-        });
-
-        const resolvedPath = step.path;
-
-        if (step.requestBody && ['POST', 'PUT', 'PATCH'].includes(step.method)) {
-            lines.push(`        When I send "${step.method}" request to "${resolvedPath}" with body:`);
-            lines.push('            """');
-            step.requestBody.split('\n').forEach(l => lines.push('            ' + l));
-            lines.push('            """');
-        } else {
-            lines.push(`        When I send "${step.method}" request to "${resolvedPath}"`);
-        }
-
-        lines.push(`        Then response status code should be ${step.expectedStatus || 200}`);
-
-        // Assertions
-        if (step.assertions.length > 0) {
-            lines.push(`        And response should match:`);
-            step.assertions.forEach(a => {
-                if (a.path) {
-                    const padded = a.path.padEnd(20);
-                    let displayCond = a.condition;
-                    if (['equals', 'contains', 'matches'].includes(a.condition)) {
-                        if (a.condition === 'equals') displayCond = a.value || '';
-                        if (a.condition === 'contains') displayCond = 'contains ' + (a.value || '');
-                        if (a.condition === 'matches') displayCond = 'matches ' + (a.value || '');
+        // Generate Gherkin following sectionOrder
+        order.forEach(key => {
+            switch (key) {
+                case 'loadGlobals':
+                    (step.loadGlobals || []).forEach(lg => {
+                        if (lg.globalKey && lg.localKey) {
+                            lines.push(`        And system loads global variable "${lg.globalKey}" as "${lg.localKey}"`);
+                        }
+                    });
+                    break;
+                case 'customSteps':
+                    (step.customSteps || []).forEach(cs => {
+                        const resolved = resolveCustomStepGherkin(cs);
+                        if (resolved && resolved.trim()) {
+                            lines.push(`        ${resolved.trim()}`);
+                        }
+                    });
+                    break;
+                case 'endpoint':
+                    if (step.path) {
+                        const resolvedPath = step.path;
+                        const rType = step.requestType || 'simple';
+                        switch (rType) {
+                            case 'simple':
+                                lines.push(`        When user sends "${step.method}" request to "${resolvedPath}"`);
+                                break;
+                            case 'withBody':
+                                lines.push(`        When user sends "${step.method}" request to "${resolvedPath}" with body:`);
+                                if (step.requestBody) {
+                                    lines.push('            """');
+                                    step.requestBody.split('\n').forEach(l => lines.push('            ' + l));
+                                    lines.push('            """');
+                                }
+                                break;
+                            case 'withQuery':
+                                lines.push(`        When user sends "${step.method}" request to "${resolvedPath}" with query params:`);
+                                if (step.requestBody) {
+                                    step.requestBody.split('\n').forEach(l => lines.push('            ' + l.trim()));
+                                }
+                                break;
+                            case 'formParams':
+                                lines.push(`        When user sends form "${step.method}" request to "${resolvedPath}" with params:`);
+                                if (step.requestBody) {
+                                    step.requestBody.split('\n').forEach(l => lines.push('            ' + l.trim()));
+                                }
+                                break;
+                            case 'withPayload':
+                                lines.push(`        When user sends "${step.method}" request to "${resolvedPath}" with payload:`);
+                                if (step.requestBody) {
+                                    step.requestBody.split('\n').forEach(l => lines.push('            ' + l.trim()));
+                                }
+                                break;
+                            default:
+                                lines.push(`        When user sends "${step.method}" request to "${resolvedPath}"`);
+                        }
                     }
-                    lines.push(`            | ${padded} | ${displayCond.padEnd(10)} |`);
-                }
-            });
-        }
-
-        // Store fields
-        step.storeFields.forEach(sf => {
-            if (sf.path && sf.key) {
-                lines.push(`        And user stores response "${sf.path}" as "${sf.key}"`);
-            }
-        });
-
-        // Save Global fields
-        (step.saveGlobals || []).forEach(sg => {
-            if (sg.path && sg.globalKey) {
-                lines.push(`        And user stores response "${sg.path}" as global variable "${sg.globalKey}"`);
+                    break;
+                case 'expectedStatus':
+                    if (step.path) {
+                        lines.push(`        Then response status code should be ${step.expectedStatus || 200}`);
+                    }
+                    break;
+                case 'assertions':
+                    // Schema example validation
+                    if (step.responseExample && step.responseExample.trim()) {
+                        lines.push(`        Then the response should match JSON schema example "${step.responseExample.trim()}"`);
+                    }
+                    if (step.assertions.length > 0) {
+                        lines.push(`        And response should match:`);
+                        step.assertions.forEach(a => {
+                            if (a.path) {
+                                const padded = a.path.padEnd(20);
+                                let displayCond = a.condition;
+                                if (['equals', 'contains', 'matches'].includes(a.condition)) {
+                                    if (a.condition === 'equals') displayCond = a.value || '';
+                                    if (a.condition === 'contains') displayCond = 'contains ' + (a.value || '');
+                                    if (a.condition === 'matches') displayCond = 'matches ' + (a.value || '');
+                                }
+                                lines.push(`            | ${padded} | ${displayCond.padEnd(10)} |`);
+                            }
+                        });
+                    }
+                    break;
+                case 'storeFields':
+                    step.storeFields.forEach(sf => {
+                        if (sf.path && sf.key) {
+                            lines.push(`        And user stores response "${sf.path}" as "${sf.key}"`);
+                        }
+                    });
+                    break;
+                case 'saveGlobals':
+                    (step.saveGlobals || []).forEach(sg => {
+                        if (sg.path && sg.globalKey) {
+                            lines.push(`        And user stores response "${sg.path}" as global variable "${sg.globalKey}"`);
+                        }
+                    });
+                    break;
             }
         });
     });
@@ -779,7 +1273,7 @@ async function testUnsavedScenario() {
     const genBtn = document.getElementById('generateFeatureBtn');
 
     const gherkin = generateGherkin();
-    if (!gherkin.includes('When I send')) {
+    if (!gherkin.includes('When user sends')) {
         toast('Please add at least one endpoint step', 'warning');
         return;
     }

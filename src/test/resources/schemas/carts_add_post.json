@@ -1,0 +1,20 @@
+{
+  "id": 51,
+  "products": [
+    {
+      "id": 1,
+      "title": "Essence Mascara Lash Princess",
+      "price": 9.99,
+      "quantity": 1,
+      "total": 9.99,
+      "discountPercentage": 10.48,
+      "discountedPrice": 9,
+      "thumbnail": "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp"
+    }
+  ],
+  "total": 9.99,
+  "discountedTotal": 9,
+  "userId": 1,
+  "totalProducts": 1,
+  "totalQuantity": 1
+}

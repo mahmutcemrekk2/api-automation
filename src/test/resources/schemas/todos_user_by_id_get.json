@@ -1,0 +1,13 @@
+{
+  "todos": [
+    {
+      "id": 47,
+      "todo": "Learn Javascript",
+      "completed": false,
+      "userId": 1
+    }
+  ],
+  "total": 2,
+  "skip": 0,
+  "limit": 2
+}

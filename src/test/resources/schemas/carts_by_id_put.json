@@ -1,0 +1,20 @@
+{
+  "id": 1,
+  "products": [
+    {
+      "id": 168,
+      "title": "Charger SXT RWD",
+      "price": 32999.99,
+      "quantity": 3,
+      "total": 98999.97,
+      "discountPercentage": 13.39,
+      "discountedPrice": 85744,
+      "thumbnail": "https://cdn.dummyjson.com/products/images/vehicle/Charger%20SXT%20RWD/thumbnail.png"
+    }
+  ],
+  "total": 103784.84,
+  "discountedTotal": 89695,
+  "userId": 33,
+  "totalProducts": 5,
+  "totalQuantity": 16
+}

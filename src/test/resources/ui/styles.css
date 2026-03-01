@@ -934,3 +934,253 @@ textarea {
     color: var(--accent);
     font-size: 20px;
 }
+
+/* Drag handle */
+.drag-handle {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    font-size: 22px;
+    color: var(--text-muted);
+    cursor: grab;
+    user-select: none;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: var(--transition);
+    z-index: 2;
+}
+
+.drag-handle:hover {
+    color: var(--accent);
+    background: var(--accent-glow);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.flow-step {
+    padding-left: 44px;
+}
+
+/* Dragging state */
+.flow-step.dragging {
+    opacity: 0.4;
+    border: 2px dashed var(--accent);
+    background: var(--accent-glow);
+}
+
+/* Drop zone indicators */
+.flow-step.drag-over-top {
+    border-top: 3px solid var(--accent);
+    margin-top: -2px;
+}
+
+.flow-step.drag-over-bottom {
+    border-bottom: 3px solid var(--accent);
+    margin-bottom: -2px;
+}
+
+/* ============================================
+   STEP LIBRARY
+   ============================================ */
+
+.step-library-panel {
+    border: 1px solid var(--border);
+}
+
+.step-lib-category {
+    margin-bottom: 12px;
+}
+
+.step-lib-cat-header {
+    display: flex;
+    align-items: center;
+}
+
+.step-lib-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    margin: 3px 0;
+    background: var(--bg-input);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.step-lib-item:hover {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+}
+
+.step-lib-item.copied {
+    border-color: var(--success);
+    background: rgba(102, 187, 106, 0.1);
+}
+
+.step-lib-item code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.step-lib-desc {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Custom Step Rows (inside flow steps) */
+.custom-step-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+}
+
+.custom-step-row input {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    color: var(--accent);
+    font-size: 11px;
+}
+
+/* Flow Step Header */
+.flow-step-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.5px;
+}
+
+/* Custom Step Card (parameter-aware) */
+.custom-step-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    margin: 6px 0;
+    transition: var(--transition);
+}
+
+.custom-step-card:hover {
+    border-color: var(--accent);
+}
+
+.custom-step-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.custom-step-header code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    word-break: break-all;
+    flex: 1;
+}
+
+.custom-param-list {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.custom-param-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.param-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--warning);
+    min-width: 80px;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Section Card (draggable sections within a flow step) */
+.section-card {
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 14px 14px 36px;
+    margin: 8px 0;
+    transition: var(--transition);
+}
+
+.section-card:hover {
+    border-color: rgba(0, 230, 118, 0.3);
+    box-shadow: 0 0 12px rgba(0, 230, 118, 0.05);
+}
+
+.section-drag-handle {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: grab;
+    color: var(--text-muted);
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 4px;
+    transition: var(--transition);
+    user-select: none;
+    line-height: 1;
+}
+
+.section-drag-handle:hover {
+    color: var(--accent);
+    background: rgba(0, 230, 118, 0.1);
+}
+
+.section-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Section drag states */
+.section-dragging {
+    opacity: 0.4;
+    border-style: dashed;
+}
+
+.section-over-top {
+    border-top: 3px solid var(--accent) !important;
+    margin-top: 5px;
+}
+
+.section-over-bottom {
+    border-bottom: 3px solid var(--accent) !important;
+    margin-bottom: 5px;
+}
+
+/* Connector arrows between section cards */
+.section-card+.section-card::before {
+    content: '↓';
+    display: block;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+}
