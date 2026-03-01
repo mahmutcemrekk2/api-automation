@@ -37,6 +37,10 @@
             <button class="git-btn primary" id="commitPushBtn" onclick="showModal('commit-modal')" disabled>
                 🚀 Commit & Push
             </button>
+            <button class="git-btn" id="pullMainBtn" onclick="switchToMainAndPull()"
+                style="margin-top:5px; border-color:var(--warning); color:var(--warning)">
+                ⬇️ Switch & Pull Main
+            </button>
             <div id="testStatus" style="font-size:11px; margin-top:8px; color:var(--text-muted)"></div>
         </div>
     </nav>
