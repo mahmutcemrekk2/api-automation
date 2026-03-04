@@ -1,10 +1,10 @@
 @smoke
 Feature: Users
-    Auto-generated test scenario
+  Auto-generated test scenario
 
-    @smoke
-    Scenario: test user flow
-        Given system uses "dummyjson" service
+  @smoke
+  Scenario: test user flow
+    Given system uses "dummyjson" service
 
-        When user sends "GET" request to "/users"
-        Then response status code should be 200
+    When user sends "GET" request to "/users"
+    Then response status code should be 200

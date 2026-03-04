@@ -1,7 +1,8 @@
 @products
 Feature: DummyJSON Products
   Product CRUD operations and listing tests.
-@products @smoke
+
+  @products @smoke
   Scenario: Get all products
     Given system uses "dummyjson" service
     When user sends "GET" request to "/products" with query params:
@@ -12,11 +13,7 @@ Feature: DummyJSON Products
       | $.products | not empty |
       | $.skip     | exists    |
 
-
-
-
   @products
-
   Scenario: Get a single product by ID
     Given system uses "dummyjson" service
     When user sends "GET" request to "/products/1"
