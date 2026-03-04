@@ -35,7 +35,7 @@ public class UIServer {
     private static String lastTestOutput = "";
 
     public static void main(String[] args) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", PORT), 0);
         server.setExecutor(Executors.newFixedThreadPool(4));
 
         // UI static files
@@ -69,12 +69,33 @@ public class UIServer {
     // STATIC FILE SERVING
     // ============================================
 
+    // ============================================
+    // SECURITY: LOCALHOST ONLY CHECK
+    // ============================================
+    private static boolean isLocalhostOnly(HttpExchange exchange) throws IOException {
+        String remoteAddress = exchange.getRemoteAddress().getAddress().getHostAddress();
+        if (!"127.0.0.1".equals(remoteAddress) && !"0:0:0:0:0:0:0:1".equals(remoteAddress)) {
+            sendResponse(exchange, 403, "application/json", "{\"error\":\"Forbidden (Localhost only)\"}");
+            return false;
+        }
+        return true;
+    }
+
     private static void handleStaticFile(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
         if ("/".equals(path))
             path = "/index.html";
 
         File file = new File(UI_DIR + path);
+        
+        // Prevent Path Traversal
+        String canonicalTarget = file.getCanonicalPath();
+        String canonicalBase = new File(UI_DIR).getCanonicalPath();
+        if (!canonicalTarget.startsWith(canonicalBase)) {
+            sendResponse(exchange, 403, "text/plain", "Forbidden");
+            return;
+        }
+        
         if (!file.exists() || file.isDirectory()) {
             sendResponse(exchange, 404, "text/plain", "Not Found");
             return;
@@ -135,6 +156,7 @@ public class UIServer {
     // ============================================
 
     private static void handleSaveFeature(HttpExchange exchange) throws IOException {
+        if (!isLocalhostOnly(exchange)) return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -179,6 +201,7 @@ public class UIServer {
     // ============================================
 
     private static void handleRunTests(HttpExchange exchange) throws IOException {
+        if (!isLocalhostOnly(exchange)) return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -230,6 +253,7 @@ public class UIServer {
     // ============================================
 
     private static void handleGitStatus(HttpExchange exchange) throws IOException {
+        if (!isLocalhostOnly(exchange)) return;
         try {
             String branch = runGitCommand("git", "rev-parse", "--abbrev-ref", "HEAD").trim();
             String status = runGitCommand("git", "status", "--porcelain");
@@ -246,6 +270,7 @@ public class UIServer {
     }
 
     private static void handleNewBranch(HttpExchange exchange) throws IOException {
+        if (!isLocalhostOnly(exchange)) return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -269,6 +294,7 @@ public class UIServer {
     }
 
     private static void handleCommitPush(HttpExchange exchange) throws IOException {
+        if (!isLocalhostOnly(exchange)) return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -394,6 +420,7 @@ public class UIServer {
     // ============================================
 
     private static void handleDeleteScenario(HttpExchange exchange) throws IOException {
+        if (!isLocalhostOnly(exchange)) return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -508,6 +535,7 @@ public class UIServer {
     // ============================================
 
     private static void handleRunSingle(HttpExchange exchange) throws IOException {
+        if (!isLocalhostOnly(exchange)) return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -563,6 +591,7 @@ public class UIServer {
     // ============================================
 
     private static void handleRunTemp(HttpExchange exchange) throws IOException {
+        if (!isLocalhostOnly(exchange)) return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -740,6 +769,7 @@ public class UIServer {
     }
 
     private static void handleGitPull(HttpExchange exchange) throws IOException {
+        if (!isLocalhostOnly(exchange)) return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
