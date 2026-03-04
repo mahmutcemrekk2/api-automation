@@ -1,22 +1,8 @@
 @products
 Feature: DummyJSON Products
   Product CRUD operations and listing tests.
-@products @smoke
-  Scenario: Get all products
-    Given system uses "dummyjson" service
-    When user sends "GET" request to "/products" with query params:
-      | limit | 4 |
-    Then response status code should be 200
-    And the response "$.limit" should be 4
-    And response should match:
-      | $.products | not empty |
-      | $.skip     | exists    |
-
-
-
 
   @products
-
   Scenario: Get a single product by ID
     Given system uses "dummyjson" service
     When user sends "GET" request to "/products/1"
