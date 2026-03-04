@@ -814,7 +814,20 @@ public class CommonSteps {
             if (!expected.isEmpty() && !actual.isEmpty()) {
                 JsonNode expectedItem = expected.get(0);
                 for (int i = 0; i < actual.size(); i++) {
-                    validateOpenApiExample(expectedItem, actual.get(i), path + "[" + i + "]", errors, warnings);
+                    JsonNode actualItem = actual.get(i);
+                    // For arrays of objects/arrays, iterate recursively.
+                    if (expectedItem.isObject() || expectedItem.isArray()) {
+                        validateOpenApiExample(expectedItem, actualItem, path + "[" + i + "]", errors, warnings);
+                    } else {
+                        // For arrays of primitives (strings, numbers, booleans)
+                        if (expectedItem.isTextual() && !actualItem.isTextual()) {
+                            errors.add(path + "[" + i + "]: expected string but got " + actualItem.getNodeType());
+                        } else if (expectedItem.isNumber() && !actualItem.isNumber()) {
+                            errors.add(path + "[" + i + "]: expected number but got " + actualItem.getNodeType());
+                        } else if (expectedItem.isBoolean() && !actualItem.isBoolean()) {
+                            errors.add(path + "[" + i + "]: expected boolean but got " + actualItem.getNodeType());
+                        }
+                    }
                 }
             }
         } else if (expected.isObject() && !actual.isObject()) {

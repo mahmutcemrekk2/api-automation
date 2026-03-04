@@ -222,9 +222,16 @@
             <input type="hidden" id="editFilename">
             <textarea id="editContent"
                 style="width:100%; height:300px; font-family:'JetBrains Mono',monospace; font-size:12px; background:#1A1D24; color:#ccc; border:1px solid #333; padding:10px;"></textarea>
-            <div class="btn-row" style="margin-top:20px;">
+            <div id="editFeatureTestResult"
+                style="margin-top:15px; display:none; padding:10px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:11px; max-height:150px; overflow-y:auto;">
+            </div>
+
+            <div class="btn-row" style="margin-top:20px; display: flex; justify-content: flex-end; gap: 10px;">
                 <button class="btn btn-secondary" onclick="closeModals()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveEditedFeature()">Save Changes</button>
+                <button class="btn btn-secondary" id="testEditFeatureBtn" onclick="testEditedFeature()">🧪 Test
+                    Feature</button>
+                <button class="btn btn-primary" id="saveEditFeatureBtn" onclick="saveEditedFeature()" disabled
+                    title="You must test the feature successfully before saving">Save Feature</button>
             </div>
         </div>
     </div>

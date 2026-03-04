@@ -87,7 +87,7 @@ public class UIServer {
             path = "/index.html";
 
         File file = new File(UI_DIR + path);
-        
+
         // Prevent Path Traversal
         String canonicalTarget = file.getCanonicalPath();
         String canonicalBase = new File(UI_DIR).getCanonicalPath();
@@ -95,7 +95,7 @@ public class UIServer {
             sendResponse(exchange, 403, "text/plain", "Forbidden");
             return;
         }
-        
+
         if (!file.exists() || file.isDirectory()) {
             sendResponse(exchange, 404, "text/plain", "Not Found");
             return;
@@ -156,7 +156,8 @@ public class UIServer {
     // ============================================
 
     private static void handleSaveFeature(HttpExchange exchange) throws IOException {
-        if (!isLocalhostOnly(exchange)) return;
+        if (!isLocalhostOnly(exchange))
+            return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -201,7 +202,8 @@ public class UIServer {
     // ============================================
 
     private static void handleRunTests(HttpExchange exchange) throws IOException {
-        if (!isLocalhostOnly(exchange)) return;
+        if (!isLocalhostOnly(exchange))
+            return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -253,7 +255,8 @@ public class UIServer {
     // ============================================
 
     private static void handleGitStatus(HttpExchange exchange) throws IOException {
-        if (!isLocalhostOnly(exchange)) return;
+        if (!isLocalhostOnly(exchange))
+            return;
         try {
             String branch = runGitCommand("git", "rev-parse", "--abbrev-ref", "HEAD").trim();
             String status = runGitCommand("git", "status", "--porcelain");
@@ -270,7 +273,8 @@ public class UIServer {
     }
 
     private static void handleNewBranch(HttpExchange exchange) throws IOException {
-        if (!isLocalhostOnly(exchange)) return;
+        if (!isLocalhostOnly(exchange))
+            return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -294,7 +298,8 @@ public class UIServer {
     }
 
     private static void handleCommitPush(HttpExchange exchange) throws IOException {
-        if (!isLocalhostOnly(exchange)) return;
+        if (!isLocalhostOnly(exchange))
+            return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -420,7 +425,8 @@ public class UIServer {
     // ============================================
 
     private static void handleDeleteScenario(HttpExchange exchange) throws IOException {
-        if (!isLocalhostOnly(exchange)) return;
+        if (!isLocalhostOnly(exchange))
+            return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -535,7 +541,8 @@ public class UIServer {
     // ============================================
 
     private static void handleRunSingle(HttpExchange exchange) throws IOException {
-        if (!isLocalhostOnly(exchange)) return;
+        if (!isLocalhostOnly(exchange))
+            return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -549,6 +556,7 @@ public class UIServer {
             java.util.List<String> command = new java.util.ArrayList<>();
             command.add("mvn");
             command.add("test");
+            command.add("-Dtest=!TestRunner");
             if (filename != null && !filename.isBlank()) {
                 command.add("-Dcucumber.features=src/test/resources/features/" + filename);
             }
@@ -591,7 +599,8 @@ public class UIServer {
     // ============================================
 
     private static void handleRunTemp(HttpExchange exchange) throws IOException {
-        if (!isLocalhostOnly(exchange)) return;
+        if (!isLocalhostOnly(exchange))
+            return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;
@@ -615,7 +624,8 @@ public class UIServer {
             Files.createDirectories(tempFeature.getParent());
             Files.writeString(tempFeature, runContent, StandardCharsets.UTF_8);
 
-            ProcessBuilder pb = new ProcessBuilder("mvn", "test", "-Dcucumber.features=" + tempFeature.toString());
+            ProcessBuilder pb = new ProcessBuilder("mvn", "test", "-Dtest=!TestRunner",
+                    "-Dcucumber.features=" + tempFeature.toString());
             pb.directory(new File("."));
             pb.redirectErrorStream(true);
             Process process = pb.start();
@@ -769,7 +779,8 @@ public class UIServer {
     }
 
     private static void handleGitPull(HttpExchange exchange) throws IOException {
-        if (!isLocalhostOnly(exchange)) return;
+        if (!isLocalhostOnly(exchange))
+            return;
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendResponse(exchange, 405, "text/plain", "Method Not Allowed");
             return;

@@ -1444,7 +1444,69 @@ async function openEditModal(filename) {
     document.getElementById('editFilename').value = filename;
     document.getElementById('editContent').value = feature.content;
     document.getElementById('editModalSubtitle').textContent = "Warning: Invalid Gherkin syntax may break the tests.";
+
+    // Reset test state for modal
+    const saveBtn = document.getElementById('saveEditFeatureBtn');
+    const testBtn = document.getElementById('testEditFeatureBtn');
+    const outBox = document.getElementById('editFeatureTestResult');
+
+    saveBtn.disabled = true;
+    saveBtn.title = "You must test the feature successfully before saving";
+    testBtn.innerHTML = '🧪 Test Feature';
+    outBox.style.display = 'none';
+    outBox.textContent = '';
+
     showModal('edit-modal');
+}
+
+async function testEditedFeature() {
+    const btn = document.getElementById('testEditFeatureBtn');
+    const saveBtn = document.getElementById('saveEditFeatureBtn');
+    const outBox = document.getElementById('editFeatureTestResult');
+    const content = document.getElementById('editContent').value;
+
+    if (!content.trim()) {
+        toast('Feature content cannot be empty', 'warning');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Testing...';
+    outBox.style.display = 'block';
+    outBox.style.borderTop = "3px solid var(--accent)";
+    outBox.innerHTML = '<span style="color:var(--accent)">Running test...</span>';
+    saveBtn.disabled = true;
+
+    try {
+        const res = await fetch('/api/run-temp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: content })
+        });
+        const data = await res.json();
+
+        if (data.output) {
+            outBox.textContent = data.output;
+        }
+
+        if (data.success) {
+            toast('✅ Edited feature passed! You can now save it.', 'success');
+            saveBtn.disabled = false;
+            saveBtn.title = "Ready to save";
+            outBox.style.borderTop = "3px solid var(--success)";
+        } else {
+            toast('❌ Edited feature failed. Fix errors before saving.', 'error');
+            saveBtn.disabled = true;
+            saveBtn.title = "You must fix the feature and run successfully before saving";
+            outBox.style.borderTop = "3px solid var(--danger)";
+        }
+    } catch (e) {
+        toast('Error: ' + e.message, 'error');
+        outBox.textContent = 'Connection error or timeout.';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '🧪 Test Feature';
 }
 
 async function saveEditedFeature() {
