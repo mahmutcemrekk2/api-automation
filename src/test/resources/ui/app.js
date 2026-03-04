@@ -28,114 +28,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ============================================
 // STEP LIBRARY DATA
 // ============================================
-const STEP_LIBRARY = [
-    { category: 'Auth', icon: '🔐', gherkin: 'Given system uses "{service}" service', desc: 'Set the target API service' },
-    { category: 'Auth', icon: '🔐', gherkin: 'Given user sets header "{name}" to "{value}"', desc: 'Set a custom request header' },
-    { category: 'Auth', icon: '🔐', gherkin: 'Given user sets the following headers:', desc: 'Set multiple headers (table)' },
-    { category: 'Auth', icon: '🔐', gherkin: 'Given user is authenticated with token "{tokenKey}"', desc: 'Authenticate with stored token' },
-    { category: 'Auth', icon: '🔐', gherkin: 'Given user is logged in as default', desc: 'Login with config credentials' },
-    { category: 'Auth', icon: '🔐', gherkin: 'Given user is logged in with username "{user}" and password "{pass}"', desc: 'Login with custom credentials' },
-    { category: 'Auth', icon: '🔐', gherkin: 'Given user has stored "{value}" as "{key}"', desc: 'Pre-store a value in context' },
-    { category: 'HTTP', icon: '🌐', gherkin: 'When user sends "{METHOD}" request to "{/path}"', desc: 'Send a simple HTTP request' },
-    { category: 'HTTP', icon: '🌐', gherkin: 'When user sends "{METHOD}" request to "{/path}" with query params:', desc: 'Send request with query parameters (table)' },
-    { category: 'HTTP', icon: '🌐', gherkin: 'When user sends "{METHOD}" request to "{/path}" with body:', desc: 'Send request with JSON body' },
-    { category: 'HTTP', icon: '🌐', gherkin: 'When user sends form "{METHOD}" request to "{/path}" with params:', desc: 'Send form-encoded request' },
-    { category: 'HTTP', icon: '🌐', gherkin: 'When user sends "{METHOD}" request to "{/path}" with payload:', desc: 'Send request with key-value payload (table)' },
-    { category: 'Assertions', icon: '✅', gherkin: 'Then response status code should be {200}', desc: 'Validate HTTP status code' },
-    { category: 'Assertions', icon: '✅', gherkin: 'Then the response "{$.field}" should be "{value}"', desc: 'Assert field equals string' },
-    { category: 'Assertions', icon: '✅', gherkin: 'Then the response "{$.field}" should be {number}', desc: 'Assert field equals integer' },
-    { category: 'Assertions', icon: '✅', gherkin: 'Then the response "{$.field}" should match regex "{pattern}"', desc: 'Assert field matches regex' },
-    { category: 'Assertions', icon: '✅', gherkin: 'Then the response "{$.field}" should contain "{substring}"', desc: 'Assert field contains text' },
-    { category: 'Assertions', icon: '✅', gherkin: 'Then response should match:', desc: 'Batch assert fields (exists/not empty/null)' },
-    { category: 'Assertions', icon: '✅', gherkin: 'Then the response should match JSON schema example "{example.json}"', desc: 'Validate response against JSON schema example (with extra property detection)' },
-    { category: 'Assertions', icon: '✅', gherkin: 'Then the response item in "{$.array}" is "{filterVal}" should have:', desc: 'Assert filtered array item fields' },
-    { category: 'Data', icon: '📦', gherkin: 'And user stores response "{$.field}" as "{varName}"', desc: 'Store a response value' },
-    { category: 'Data', icon: '📦', gherkin: 'And user stores response body as "{varName}"', desc: 'Store entire response body' },
-    { category: 'Data', icon: '📦', gherkin: 'And user stores the following values from the response:', desc: 'Store multiple values (table)' },
-    { category: 'Data', icon: '📦', gherkin: 'And user stores the cookie "{cookieName}" as "{varName}"', desc: 'Store a response cookie' },
-    { category: 'Data', icon: '📦', gherkin: 'And user stores "{targetField}" from "{$.array}" is "{filterVal}" as "{varName}"', desc: 'Store field from filtered array' },
-    { category: 'Data', icon: '📦', gherkin: 'Then user stores response "{$.field}" as global variable "{globalKey}"', desc: 'Save to global variable' },
-    { category: 'Data', icon: '📦', gherkin: 'Given system loads global variable "{globalKey}" as "{localKey}"', desc: 'Load global variable into context' },
-    { category: 'Utilities', icon: '⚙️', gherkin: 'Given user generates a random phone number as "{varName}"', desc: 'Generate random phone number' },
-    { category: 'Utilities', icon: '⚙️', gherkin: 'Given user generates a random email as "{varName}"', desc: 'Generate random email address' },
-    { category: 'Utilities', icon: '⚙️', gherkin: 'Given user generates a random slug as "{varName}"', desc: 'Generate random URL slug' },
-    { category: 'Utilities', icon: '⚙️', gherkin: 'Given user generates a random timestamp as "{varName}"', desc: 'Generate random timestamp' },
-    { category: 'Utilities', icon: '⚙️', gherkin: 'Given user generates a random {N} digit number as "{varName}"', desc: 'Generate random N-digit number' },
-    { category: 'Utilities', icon: '⚙️', gherkin: 'And system waits for {N} seconds', desc: 'Wait/sleep for N seconds' },
-];
-
-const CATEGORY_COLORS = {
-    'Auth': '#f59e0b',
-    'HTTP': '#3b82f6',
-    'Assertions': '#10b981',
-    'Data': '#8b5cf6',
-    'Utilities': '#ef4444'
-};
-
-function renderStepLibrary(filter = '') {
-    const container = document.getElementById('stepLibraryList');
-    if (!container) return;
-
-    const lowerFilter = filter.toLowerCase();
-    const categories = {};
-
-    STEP_LIBRARY.forEach(s => {
-        if (lowerFilter && !s.gherkin.toLowerCase().includes(lowerFilter) && !s.desc.toLowerCase().includes(lowerFilter) && !s.category.toLowerCase().includes(lowerFilter)) return;
-        if (!categories[s.category]) categories[s.category] = [];
-        categories[s.category].push(s);
-    });
-
-    if (Object.keys(categories).length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted); font-size:12px; text-align:center; padding:20px;">No steps match your search.</p>';
-        return;
-    }
-
-    container.innerHTML = Object.entries(categories).map(([cat, steps]) => `
-        <div class="step-lib-category">
-            <div class="step-lib-cat-header" style="border-left: 3px solid ${CATEGORY_COLORS[cat] || '#666'}; padding-left:8px; margin-bottom:6px;">
-                <span style="font-size:12px; font-weight:600; color:${CATEGORY_COLORS[cat] || '#ccc'}">${steps[0].icon} ${cat}</span>
-                <span style="font-size:10px; color:var(--text-muted); margin-left:6px;">(${steps.length})</span>
-            </div>
-            ${steps.map(s => `
-                <div class="step-lib-item" onclick="copyStepToClipboard(this, '${escHtml(s.gherkin)}')" title="${escHtml(s.desc)}\n\nClick to copy to clipboard">
-                    <code>${escHtml(s.gherkin)}</code>
-                    <span class="step-lib-desc">${escHtml(s.desc)}</span>
-                </div>
-            `).join('')}
-        </div>
-    `).join('');
-}
-
-function filterStepLibrary(value) {
-    renderStepLibrary(value);
-}
-
-function toggleStepLibrary() {
-    const body = document.getElementById('stepLibraryBody');
-    const toggle = document.getElementById('stepLibraryToggle');
-    if (body.style.display === 'none') {
-        body.style.display = 'block';
-        toggle.textContent = '▼';
-    } else {
-        body.style.display = 'none';
-        toggle.textContent = '▶';
-    }
-}
-
-function copyStepToClipboard(el, text) {
-    // Unescape HTML entities back
-    const tmp = document.createElement('textarea');
-    tmp.innerHTML = text;
-    const cleanText = tmp.value;
-
-    // Insert into the active flow step
-    insertLibraryStep(cleanText);
-
-    // Also copy to clipboard
-    navigator.clipboard.writeText('        ' + cleanText).catch(() => { });
-    el.classList.add('copied');
-    setTimeout(() => el.classList.remove('copied'), 1500);
-}
 
 async function loadData() {
     try {
@@ -393,7 +285,7 @@ function renderSetupSteps() {
 }
 
 // ============================================
-const DEFAULT_SECTION_ORDER = ['loadGlobals', 'customSteps', 'configuration', 'endpoint', 'expectedStatus', 'requestBody', 'storeFields', 'saveGlobals', 'assertions'];
+const DEFAULT_SECTION_ORDER = ['loadGlobals', 'configuration', 'endpoint', 'expectedStatus', 'requestBody', 'storeFields', 'saveGlobals', 'assertions'];
 
 // Request type options built from HTTP steps in STEP_LIBRARY
 const REQUEST_TYPES = [
@@ -420,7 +312,6 @@ function addFlowStep() {
         storeFields: [],
         saveGlobals: [],
         assertions: [],
-        customSteps: [],
         sectionOrder: [...DEFAULT_SECTION_ORDER]
     };
     flowSteps.push(step);
@@ -433,7 +324,6 @@ function removeFlowStep(stepId) {
 
 const SECTION_META = {
     loadGlobals: { icon: '📥', label: 'Load Global Variables' },
-    customSteps: { icon: '📚', label: 'Custom Steps (Pre-Request)' },
     configuration: { icon: '⚙️', label: 'Configuration' },
     endpoint: { icon: '🌐', label: 'Endpoint' },
     expectedStatus: { icon: '📊', label: 'Expected Status' },
@@ -471,33 +361,6 @@ function renderSection(key, step, n) {
                 </div>`).join('')}
             </div>
             <button class="add-row-btn" onclick="addLoadGlobal(${step.id})">+ Add Load Global Variable</button>`;
-            break;
-
-        case 'customSteps':
-            body = `
-            <div id="custom-steps-${step.id}">
-                ${(step.customSteps || []).map((cs, i) => {
-                const csObj = typeof cs === 'string' ? { gherkin: cs, params: extractParams(cs) } : cs;
-                const paramInputs = (csObj.params || []).map((p, pi) => `
-                        <div class="custom-param-row">
-                            <span class="param-label">${escHtml(p.name)}</span>
-                            <input type="text" placeholder="Enter value" value="${escHtml(p.value || '')}"
-                                   onchange="updateCustomStepParam(${step.id},${i},${pi},this.value)"
-                                   style="font-family:'JetBrains Mono',monospace; font-size:11px; flex:1;">
-                        </div>
-                    `).join('');
-                return `
-                    <div class="custom-step-card">
-                        <div class="custom-step-header">
-                            <code>${escHtml(csObj.gherkin)}</code>
-                            <button class="remove-btn" onclick="removeCustomStep(${step.id},${i})">✕</button>
-                        </div>
-                        ${paramInputs ? `<div class="custom-param-list">${paramInputs}</div>` : ''}
-                    </div>`;
-            }).join('')}
-            </div>
-            <button class="add-row-btn" onclick="addCustomStepManual(${step.id})">+ Add Custom Step</button>
-            <p style="font-size:10px; color:var(--text-muted); margin-top:4px">💡 Click any step in 📚 Step Library to insert here</p>`;
             break;
 
         case 'configuration':
@@ -970,69 +833,6 @@ function updateAssertion(stepId, index, field, value) {
         }
         renderFlowSteps();
     }
-}
-
-// Custom Steps (from Step Library)
-function extractParams(gherkinText) {
-    const matches = [...gherkinText.matchAll(/\{([^}]+)\}/g)];
-    return matches.map(m => ({ name: m[1], value: '' }));
-}
-
-function addCustomStepManual(stepId) {
-    const step = flowSteps.find(s => s.id === stepId);
-    if (step) {
-        if (!step.customSteps) step.customSteps = [];
-        step.customSteps.push({ gherkin: 'And ...', params: [] });
-        renderFlowSteps();
-    }
-}
-function removeCustomStep(stepId, index) {
-    const step = flowSteps.find(s => s.id === stepId);
-    if (step && step.customSteps) { step.customSteps.splice(index, 1); renderFlowSteps(); }
-}
-function updateCustomStepParam(stepId, csIndex, paramIndex, value) {
-    const step = flowSteps.find(s => s.id === stepId);
-    if (step && step.customSteps && step.customSteps[csIndex]) {
-        const cs = step.customSteps[csIndex];
-        if (typeof cs === 'string') {
-            step.customSteps[csIndex] = { gherkin: cs, params: extractParams(cs) };
-        }
-        if (step.customSteps[csIndex].params[paramIndex]) {
-            step.customSteps[csIndex].params[paramIndex].value = value;
-        }
-        updatePreview();
-    }
-}
-function insertLibraryStep(gherkinText) {
-    // Insert into the LAST flow step's customSteps
-    if (flowSteps.length === 0) {
-        toast('No flow steps to insert into. Add a step first!', 'error');
-        return;
-    }
-    const targetStep = flowSteps[flowSteps.length - 1];
-    if (!targetStep.customSteps) targetStep.customSteps = [];
-    targetStep.customSteps.push({ gherkin: gherkinText, params: extractParams(gherkinText) });
-    renderFlowSteps();
-    toast(`📚 Step inserted into Flow ${flowSteps.length}!`, 'success');
-
-    // Scroll to the custom steps section
-    setTimeout(() => {
-        const el = document.getElementById(`custom-steps-${targetStep.id}`);
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 200);
-}
-
-function resolveCustomStepGherkin(csObj) {
-    if (typeof csObj === 'string') return csObj;
-    let text = csObj.gherkin;
-    (csObj.params || []).forEach(p => {
-        if (p.value) {
-            // Replace "{paramName}" (with quotes) or {paramName} (without quotes)
-            text = text.replace(`"{${p.name}}"`, `"${p.value}"`);
-            text = text.replace(`{${p.name}}`, p.value);
-        }
-    });
-    return text;
 }
 
 // ============================================
