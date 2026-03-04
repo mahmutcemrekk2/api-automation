@@ -531,13 +531,17 @@ public class CommonSteps {
     // ============================================
 
     @Then("user stores response {string} as global variable {string}")
-    public void userSavesAsGlobalVariable(String valueKey, String globalKey) {
-        String value = context.getString(valueKey);
+    public void userSavesAsGlobalVariable(String jsonPath, String globalKey) {
+        Object extractedValue = context.extract(jsonPath);
+        if (extractedValue == null) {
+            throw new IllegalStateException("Value for jsonPath '" + jsonPath + "' not found in response");
+        }
+        String value = extractedValue.toString();
         if (value.isEmpty()) {
-            throw new IllegalStateException("Value for key '" + valueKey + "' not found in context");
+            throw new IllegalStateException("Extracted value for jsonPath '" + jsonPath + "' is empty");
         }
         GlobalTestState.set(globalKey, value);
-        logger.info("Saved '{}' as global variable '{}'", value, globalKey);
+        logger.info("Saved '{}' (from '{}') as global variable '{}'", value, jsonPath, globalKey);
     }
 
     @And("user stores value {string} as global variable {string}")
